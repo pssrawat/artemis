@@ -1,8 +1,10 @@
 DESCRIPTION
+
 This is the ARTEMIS code generator, that generates highly-optimized and tunable
 CUDA code from an input DSL specification.
 
 DEPENDENCIES
+
 We tested the framework on ubuntu 16.04 and Red Hat Enterprise Linux Server release 6.7 using a 
 Kepler K40c card, with GCC 5.3.0, and NVCC 8.0. The following are hardware requirements
 for the framework:
@@ -16,6 +18,7 @@ for the framework:
 STEPS TO INSTALL
 
 1. Simply run 'make all' in the main directory. The makefile will create a 'stencilgen' executable.
+2. The testcases are in benchmarks/ directory. Copy the executable to each testcase directory, and execute the 'starter.sh' script.
 
 
 COPYRIGHT
@@ -26,4 +29,4 @@ included in this tool and copyrighted 2019 Ohio State University.
 
 MORE INFORMATION
 
-For more information on how to add a new benchmark, see the docs/ folder or contact me at <rawat.15@osu.edu>
+For more information on how to add a new benchmark, contact me at <rawat.15@osu.edu>. We will update the codebase with fully integrated version of Artemis in November'19.
