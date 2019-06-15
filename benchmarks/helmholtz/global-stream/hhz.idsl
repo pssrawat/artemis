@@ -1,0 +1,35 @@
+parameter L, M, N;
+iterator k, j, i;
+double in[L,M,N], out[L,M,N], t[L,M,N];
+double a, b, h2inv;
+
+copyin in, out, t, h2inv, a, b;
+
+stencil helmholtz (out, in, h2inv, a, b) {
+ double temp[L,M,N];
+ double c = b*h2inv*0.0833;
+ double d = c * 1.0;
+ double e = c * 16.0;
+ double f = c * 90.0;
+
+ gmem out,in;
+ out[k][j][i] = a*in[k][j][i] + 
+	   d*(in[k-2][j][i] + 
+              in[k][j-2][i] + 
+              in[k][j][i-2] + 
+              in[k][j][i+2] + 
+              in[k][j+2][i] + 
+              in[k+2][j][i]) + 
+       e*(in[k-1][j][i] + 
+              in[k][j-1][i] + 
+              in[k][j][i-1] + 
+              in[k][j][i+1] + 
+              in[k][j+1][i] + 
+              in[k+1][j][i]) -
+       f*in[k][j][i];
+}
+
+helmholtz (out, in, h2inv, a, b);
+helmholtz (in, out, h2inv, a, b);
+copyout in;
+

@@ -1,0 +1,197 @@
+parameter L, M, N;
+iterator k, j, i;
+double in[L,M,N], out[L,M,N];
+double a, b, h2inv;
+
+copyin in, out, t, h2inv, a, b;
+
+stencil jacobi (out, in, h2inv, a, b) {
+ double temp1[L,M,N];
+ double temp2[L,M,N];
+ double temp3[L,M,N];
+ double temp4[L,M,N];
+ double temp5[L,M,N];
+ double c = b * h2inv;
+ double d = c * 0.5;
+ double e = c * 0.125;
+ double f = c * 0.3;
+
+ temp1[k][j][i] = a*in[k][j][i] -
+                d*(in[k-1][j-1][i-1] +
+                   in[k-1][j-1][i+1] +
+                   in[k-1][j+1][i-1] +
+                   in[k-1][j+1][i+1] +
+                   in[k+1][j-1][i-1] +
+                   in[k+1][j-1][i+1] +
+                   in[k+1][j+1][i-1] +
+                   in[k+1][j+1][i+1]) +
+                e*(in[k-1][j-1][i] +
+                   in[k-1][j][i-1] +
+                   in[k-1][j][i+1] +
+                   in[k-1][j+1][i] +
+                   in[k][j-1][i-1] +
+                   in[k][j-1][i+1] +
+                   in[k][j+1][i-1] +
+                   in[k][j+1][i+1] +
+                   in[k+1][j-1][i] +
+                   in[k+1][j][i-1] +
+                   in[k+1][j][i+1] +
+                   in[k][j+1][i]) +
+                f*(in[k-1][j][i] +
+                   in[k][j-1][i] +
+                   in[k][j][i-1] +
+                   in[k][j][i+1] +
+                   in[k][j+1][i] +
+                   in[k+1][j][i]) +
+                0.13*in[k][j][i];
+
+ temp2[k][j][i] = a*temp1[k][j][i] -
+                d*(temp1[k-1][j-1][i-1] +
+                   temp1[k-1][j-1][i+1] +
+                   temp1[k-1][j+1][i-1] +
+                   temp1[k-1][j+1][i+1] +
+                   temp1[k+1][j-1][i-1] +
+                   temp1[k+1][j-1][i+1] +
+                   temp1[k+1][j+1][i-1] +
+                   temp1[k+1][j+1][i+1]) +
+                e*(temp1[k-1][j-1][i] +
+                   temp1[k-1][j][i-1] +
+                   temp1[k-1][j][i+1] +
+                   temp1[k-1][j+1][i] +
+                   temp1[k][j-1][i-1] +
+                   temp1[k][j-1][i+1] +
+                   temp1[k][j+1][i-1] +
+                   temp1[k][j+1][i+1] +
+                   temp1[k+1][j-1][i] +
+                   temp1[k+1][j][i-1] +
+                   temp1[k+1][j][i+1] +
+                   temp1[k][j+1][i]) +
+                f*(temp1[k-1][j][i] +
+                   temp1[k][j-1][i] +
+                   temp1[k][j][i-1] +
+                   temp1[k][j][i+1] +
+                   temp1[k][j+1][i] +
+                   temp1[k+1][j][i]) +
+                0.13*temp1[k][j][i];
+
+ temp3[k][j][i] = a*temp2[k][j][i] -
+                d*(temp2[k-1][j-1][i-1] +
+                   temp2[k-1][j-1][i+1] +
+                   temp2[k-1][j+1][i-1] +
+                   temp2[k-1][j+1][i+1] +
+                   temp2[k+1][j-1][i-1] +
+                   temp2[k+1][j-1][i+1] +
+                   temp2[k+1][j+1][i-1] +
+                   temp2[k+1][j+1][i+1]) +
+                e*(temp2[k-1][j-1][i] +
+                   temp2[k-1][j][i-1] +
+                   temp2[k-1][j][i+1] +
+                   temp2[k-1][j+1][i] +
+                   temp2[k][j-1][i-1] +
+                   temp2[k][j-1][i+1] +
+                   temp2[k][j+1][i-1] +
+                   temp2[k][j+1][i+1] +
+                   temp2[k+1][j-1][i] +
+                   temp2[k+1][j][i-1] +
+                   temp2[k+1][j][i+1] +
+                   temp2[k][j+1][i]) +
+                f*(temp2[k-1][j][i] +
+                   temp2[k][j-1][i] +
+                   temp2[k][j][i-1] +
+                   temp2[k][j][i+1] +
+                   temp2[k][j+1][i] +
+                   temp2[k+1][j][i]) +
+                0.13*temp2[k][j][i];
+
+ temp4[k][j][i] = a*temp3[k][j][i] -
+                d*(temp3[k-1][j-1][i-1] +
+                   temp3[k-1][j-1][i+1] +
+                   temp3[k-1][j+1][i-1] +
+                   temp3[k-1][j+1][i+1] +
+                   temp3[k+1][j-1][i-1] +
+                   temp3[k+1][j-1][i+1] +
+                   temp3[k+1][j+1][i-1] +
+                   temp3[k+1][j+1][i+1]) +
+                e*(temp3[k-1][j-1][i] +
+                   temp3[k-1][j][i-1] +
+                   temp3[k-1][j][i+1] +
+                   temp3[k-1][j+1][i] +
+                   temp3[k][j-1][i-1] +
+                   temp3[k][j-1][i+1] +
+                   temp3[k][j+1][i-1] +
+                   temp3[k][j+1][i+1] +
+                   temp3[k+1][j-1][i] +
+                   temp3[k+1][j][i-1] +
+                   temp3[k+1][j][i+1] +
+                   temp3[k][j+1][i]) +
+                f*(temp3[k-1][j][i] +
+                   temp3[k][j-1][i] +
+                   temp3[k][j][i-1] +
+                   temp3[k][j][i+1] +
+                   temp3[k][j+1][i] +
+                   temp3[k+1][j][i]) +
+                0.13*temp3[k][j][i];
+
+ temp5[k][j][i] = a*temp4[k][j][i] -
+                d*(temp4[k-1][j-1][i-1] +
+                   temp4[k-1][j-1][i+1] +
+                   temp4[k-1][j+1][i-1] +
+                   temp4[k-1][j+1][i+1] +
+                   temp4[k+1][j-1][i-1] +
+                   temp4[k+1][j-1][i+1] +
+                   temp4[k+1][j+1][i-1] +
+                   temp4[k+1][j+1][i+1]) +
+                e*(temp4[k-1][j-1][i] +
+                   temp4[k-1][j][i-1] +
+                   temp4[k-1][j][i+1] +
+                   temp4[k-1][j+1][i] +
+                   temp4[k][j-1][i-1] +
+                   temp4[k][j-1][i+1] +
+                   temp4[k][j+1][i-1] +
+                   temp4[k][j+1][i+1] +
+                   temp4[k+1][j-1][i] +
+                   temp4[k+1][j][i-1] +
+                   temp4[k+1][j][i+1] +
+                   temp4[k][j+1][i]) +
+                f*(temp4[k-1][j][i] +
+                   temp4[k][j-1][i] +
+                   temp4[k][j][i-1] +
+                   temp4[k][j][i+1] +
+                   temp4[k][j+1][i] +
+                   temp4[k+1][j][i]) +
+                0.13*temp4[k][j][i];
+
+ out[k][j][i] = a*temp5[k][j][i] -
+                d*(temp5[k-1][j-1][i-1] +
+                   temp5[k-1][j-1][i+1] +
+                   temp5[k-1][j+1][i-1] +
+                   temp5[k-1][j+1][i+1] +
+                   temp5[k+1][j-1][i-1] +
+                   temp5[k+1][j-1][i+1] +
+                   temp5[k+1][j+1][i-1] +
+                   temp5[k+1][j+1][i+1]) +
+                e*(temp5[k-1][j-1][i] +
+                   temp5[k-1][j][i-1] +
+                   temp5[k-1][j][i+1] +
+                   temp5[k-1][j+1][i] +
+                   temp5[k][j-1][i-1] +
+                   temp5[k][j-1][i+1] +
+                   temp5[k][j+1][i-1] +
+                   temp5[k][j+1][i+1] +
+                   temp5[k+1][j-1][i] +
+                   temp5[k+1][j][i-1] +
+                   temp5[k+1][j][i+1] +
+                   temp5[k][j+1][i]) +
+                f*(temp5[k-1][j][i] +
+                   temp5[k][j-1][i] +
+                   temp5[k][j][i-1] +
+                   temp5[k][j][i+1] +
+                   temp5[k][j+1][i] +
+                   temp5[k+1][j][i]) +
+                0.13*temp5[k][j][i];
+}
+
+jacobi (out, in, h2inv, a, b);
+jacobi (in, out, h2inv, a, b);
+
+copyout in;

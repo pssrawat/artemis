@@ -1,0 +1,29 @@
+parameter L, M, N;
+iterator k, j, i;
+double Ac[L,M,N], Ap[L,M,N], out[L,M,N], Dinv[L,M,N], RHS[L,M,N];
+double c1, c2, h2inv;
+
+allocin out;
+copyin Ac, Ap, RHS, Dinv, h2inv, c1, c2;
+
+stencil cheby (out, Ac, Ap, RHS, Dinv, h2inv, c1, c2) {
+	double a, b, c, d;
+	double t1[L,M,N], t2[L,M,N], t3[L,M,N], temp1[L,M,N], temp2[L,M,N];       
+	a = h2inv * 0.03;
+	b = h2inv * 0.1;
+	c = h2inv * 0.46;
+	d = h2inv * 4.26;
+
+ 	t1[k][j][i] = -Ac[k][j][i] + a * (Ac[k-1][j-1][i-1] + Ac[k-1][j-1][i+1] + Ac[k-1][j+1][i-1] + Ac[k-1][j+1][i+1] + Ac[k+1][j-1][i-1] + Ac[k+1][j-1][i+1] + Ac[k+1][j+1][i-1] + Ac[k+1][j+1][i+1]) + b * (Ac[k-1][j-1][i] + Ac[k-1][j][i-1] + Ac[k-1][j][i+1] + Ac[k-1][j+1][i] + Ac[k][j-1][i-1] + Ac[k][j-1][i+1] + Ac[k][j+1][i-1] + Ac[k][j+1][i+1] + Ac[k+1][j-1][i] + Ac[k+1][j][i-1] + Ac[k+1][j][i+1] + Ac[k+1][j+1][i]) + c * (Ac[k-1][j][i] + Ac[k][j-1][i] + Ac[k][j][i-1] + Ac[k][j][i+1] + Ac[k][j+1][i] + Ac[k+1][j][i]) - d * Ac[k][j][i];
+        temp1[k][j][i] = Ac[k][j][i] + c1 * (Ac[k][j][i] - Ap[k][j][i]) + c2 * Dinv[k][j][i] * (RHS[k][j][i] + t1[k][j][i]);
+
+ 	t2[k][j][i] = -temp1[k][j][i] + a * (temp1[k-1][j-1][i-1] + temp1[k-1][j-1][i+1] + temp1[k-1][j+1][i-1] + temp1[k-1][j+1][i+1] + temp1[k+1][j-1][i-1] + temp1[k+1][j-1][i+1] + temp1[k+1][j+1][i-1] + temp1[k+1][j+1][i+1]) + b * (temp1[k-1][j-1][i] + temp1[k-1][j][i-1] + temp1[k-1][j][i+1] + temp1[k-1][j+1][i] + temp1[k][j-1][i-1] + temp1[k][j-1][i+1] + temp1[k][j+1][i-1] + temp1[k][j+1][i+1] + temp1[k+1][j-1][i] + temp1[k+1][j][i-1] + temp1[k+1][j][i+1] + temp1[k+1][j+1][i]) + c * (temp1[k-1][j][i] + temp1[k][j-1][i] + temp1[k][j][i-1] + temp1[k][j][i+1] + temp1[k][j+1][i] + temp1[k+1][j][i]) - d * temp1[k][j][i];
+        temp2[k][j][i] = temp1[k][j][i] + c1 * (temp1[k][j][i] - Ac[k][j][i]) + c2 * Dinv[k][j][i] * (RHS[k][j][i] + t2[k][j][i]);
+
+ 	t3[k][j][i] = -temp2[k][j][i] + a * (temp2[k-1][j-1][i-1] + temp2[k-1][j-1][i+1] + temp2[k-1][j+1][i-1] + temp2[k-1][j+1][i+1] + temp2[k+1][j-1][i-1] + temp2[k+1][j-1][i+1] + temp2[k+1][j+1][i-1] + temp2[k+1][j+1][i+1]) + b * (temp2[k-1][j-1][i] + temp2[k-1][j][i-1] + temp2[k-1][j][i+1] + temp2[k-1][j+1][i] + temp2[k][j-1][i-1] + temp2[k][j-1][i+1] + temp2[k][j+1][i-1] + temp2[k][j+1][i+1] + temp2[k+1][j-1][i] + temp2[k+1][j][i-1] + temp2[k+1][j][i+1] + temp2[k+1][j+1][i]) + c * (temp2[k-1][j][i] + temp2[k][j-1][i] + temp2[k][j][i-1] + temp2[k][j][i+1] + temp2[k][j+1][i] + temp2[k+1][j][i]) - d * temp2[k][j][i];
+        out[k][j][i] = temp2[k][j][i] + c1 * (temp2[k][j][i] - temp1[k][j][i]) + c2 * Dinv[k][j][i] * (RHS[k][j][i] + t3[k][j][i]);
+}
+
+cheby (out, Ac, Ap, RHS, Dinv, h2inv, c1, c2);
+
+copyout out;

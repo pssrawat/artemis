@@ -1,0 +1,260 @@
+parameter L,M,N;
+iterator k, j, i;
+double uacc_0[L,M,N], uacc_1[L,M,N], uacc_2[L,M,N], u_0[L,M,N], u_1[L,M,N], u_2[L,M,N], mu[L,M,N], la[L,M,N], met_0[L,M,N], met_1[L,M,N], met_2[L,M,N], met_3[L,M,N], jac[L,M,N], strx[N], stry[M];
+copyin uacc_0, uacc_1, uacc_2, u_0, u_1, u_2, mu, la, met_0, met_1, met_2, met_3, jac;
+constant strx, stry; 
+
+stencil sw4 (uacc_0, uacc_1, uacc_2, u_0, u_1, u_2, mu, la, met_0, met_1, met_2, met_3, jac, strx, stry) {
+	double tf = 3.0/4.0;
+	double i6 = 1.0/6.0;
+	double i144 = 1.0/144.0;
+	double i12 = 1.0/12.0;
+	double c1 = 2.0/3.0;
+	double c2 = -1.0/12.0;
+	double a1 = 1.0/31.0;
+
+	double r1, r2, r3, ijac, istry, istrx, istrxy, cof1, cof2, cof3, cof4, cof5, mux1, mux2, mux3, mux4;
+
+	shmem u_0, u_1, u_2;
+	gmem mu, la, met_0, met_1, met_2, met_3, jac;
+
+	r1 = 0.0;
+	r2 = 0.0;
+	r3 = 0.0;
+	ijac = strx[i]*stry[j]/jac[k][j][i];
+	istry = 1/(stry[j]);
+	istrx = 1/(strx[i]);
+	istrxy = istry*istrx;
+
+	cof1=(2*mu[k][j][i-2]+la[k][j][i-2])*met_0[k][j][i-2]*met_0[k][j][i-2]*strx[i-2];
+	cof2=(2*mu[k][j][i-1]+la[k][j][i-1])*met_0[k][j][i-1]*met_0[k][j][i-1]*strx[i-1];
+	cof3=(2*mu[k][j][i]+la[k][j][i])*met_0[k][j][i]*met_0[k][j][i]*strx[i];
+	cof4=(2*mu[k][j][i+1]+la[k][j][i+1])*met_0[k][j][i+1]*met_0[k][j][i+1]*strx[i+1];
+	cof5=(2*mu[k][j][i+2]+la[k][j][i+2])*met_0[k][j][i+2]*met_0[k][j][i+2]*strx[i+2];
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r1 +=  i6* (mux1*(u_0[k][j][i-2]-u_0[k][j][i]) + mux2*(u_0[k][j][i-1]-u_0[k][j][i]) + mux3*(u_0[k][j][i+1]-u_0[k][j][i]) + mux4*(u_0[k][j][i+2]-u_0[k][j][i]))*istry;
+	cof1=(mu[k][j-2][i])*met_0[k][j-2][i]*met_0[k][j-2][i]*stry[j-2];
+	cof2=(mu[k][j-1][i])*met_0[k][j-1][i]*met_0[k][j-1][i]*stry[j-1];
+	cof3=(mu[k][j][i])*met_0[k][j][i]*met_0[k][j][i]*stry[j];
+	cof4=(mu[k][j+1][i])*met_0[k][j+1][i]*met_0[k][j+1][i]*stry[j+1];
+	cof5=(mu[k][j+2][i])*met_0[k][j+2][i]*met_0[k][j+2][i]*stry[j+2];
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r1 += i6* (mux1*(u_0[k][j-2][i]-u_0[k][j][i]) + mux2*(u_0[k][j-1][i]-u_0[k][j][i]) + mux3*(u_0[k][j+1][i]-u_0[k][j][i]) + mux4*(u_0[k][j+2][i]-u_0[k][j][i]))*istrx;
+	cof1 = (2*mu[k-2][j][i]+la[k-2][j][i])*met_1[k-2][j][i]*strx[i]*met_1[k-2][j][i]*strx[i] + mu[k-2][j][i]*(met_2[k-2][j][i]*stry[j]*met_2[k-2][j][i]*stry[j] + met_3[k-2][j][i]*met_3[k-2][j][i]);
+	cof2 = (2*mu[k-1][j][i]+la[k-1][j][i])*met_1[k-1][j][i]*strx[i]*met_1[k-1][j][i]*strx[i] + mu[k-1][j][i]*(met_2[k-1][j][i]*stry[j]*met_2[k-1][j][i]*stry[j] + met_3[k-1][j][i]*met_3[k-1][j][i]);
+	cof3 = (2*mu[k][j][i]+la[k][j][i])*met_1[k][j][i]*strx[i]*met_1[k][j][i]*strx[i] + mu[k][j][i]*(met_2[k][j][i]*stry[j]*met_2[k][j][i]*stry[j] + met_3[k][j][i]*met_3[k][j][i]);
+	cof4 = (2*mu[k+1][j][i]+la[k+1][j][i])*met_1[k+1][j][i]*strx[i]*met_1[k+1][j][i]*strx[i] + mu[k+1][j][i]*(met_2[k+1][j][i]*stry[j]*met_2[k+1][j][i]*stry[j] + met_3[k+1][j][i]*met_3[k+1][j][i]);
+	cof5 = (2*mu[k+2][j][i]+la[k+2][j][i])*met_1[k+2][j][i]*strx[i]*met_1[k+2][j][i]*strx[i] + mu[k+2][j][i]*(met_2[k+2][j][i]*stry[j]*met_2[k+2][j][i]*stry[j] + met_3[k+2][j][i]*met_3[k+2][j][i]);
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r1 += i6*(mux1*(u_0[k-2][j][i]-u_0[k][j][i]) + mux2*(u_0[k-1][j][i]-u_0[k][j][i]) + mux3*(u_0[k+1][j][i]-u_0[k][j][i]) + mux4*(u_0[k+2][j][i]-u_0[k][j][i]))*istrxy;
+	cof1=(mu[k-2][j][i]+la[k-2][j][i])*met_1[k-2][j][i]*met_2[k-2][j][i];
+	cof2=(mu[k-1][j][i]+la[k-1][j][i])*met_1[k-1][j][i]*met_2[k-1][j][i];
+	cof3=(mu[k][j][i]+la[k][j][i])*met_1[k][j][i]*met_2[k][j][i];
+	cof4=(mu[k+1][j][i]+la[k+1][j][i])*met_1[k+1][j][i]*met_2[k+1][j][i];
+	cof5=(mu[k+2][j][i]+la[k+2][j][i])*met_1[k+2][j][i]*met_2[k+2][j][i];
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r1 += i6*(mux1*(u_1[k-2][j][i]-u_1[k][j][i]) + mux2*(u_1[k-1][j][i]-u_1[k][j][i]) + mux3*(u_1[k+1][j][i]-u_1[k][j][i]) + mux4*(u_1[k+2][j][i]-u_1[k][j][i]));
+	cof1=(mu[k-2][j][i]+la[k-2][j][i])*met_1[k-2][j][i]*met_3[k-2][j][i];
+	cof2=(mu[k-1][j][i]+la[k-1][j][i])*met_1[k-1][j][i]*met_3[k-1][j][i];
+	cof3=(mu[k][j][i]+la[k][j][i])*met_1[k][j][i]*met_3[k][j][i];
+	cof4=(mu[k+1][j][i]+la[k+1][j][i])*met_1[k+1][j][i]*met_3[k+1][j][i];
+	cof5=(mu[k+2][j][i]+la[k+2][j][i])*met_1[k+2][j][i]*met_3[k+2][j][i];
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r1 += i6*(mux1*(u_2[k-2][j][i]-u_2[k][j][i]) + mux2*(u_2[k-1][j][i]-u_2[k][j][i]) + mux3*(u_2[k+1][j][i]-u_2[k][j][i]) + mux4*(u_2[k+2][j][i]-u_2[k][j][i]))*istry;
+
+	r1 += c2*(mu[k][j+2][i]*met_0[k][j+2][i]*met_0[k][j+2][i]*(c2*(u_1[k][j+2][i+2]-u_1[k][j+2][i-2]) + c1*(u_1[k][j+2][i+1]-u_1[k][j+2][i-1])) - mu[k][j-2][i]*met_0[k][j-2][i]*met_0[k][j-2][i]*(c2*(u_1[k][j-2][i+2]-u_1[k][j-2][i-2])+ c1*(u_1[k][j-2][i+1]-u_1[k][j-2][i-1]))) + c1*(mu[k][j+1][i]*met_0[k][j+1][i]*met_0[k][j+1][i]*(c2*(u_1[k][j+1][i+2]-u_1[k][j+1][i-2]) + c1*(u_1[k][j+1][i+1]-u_1[k][j+1][i-1])) - mu[k][j-1][i]*met_0[k][j-1][i]*met_0[k][j-1][i]*(c2*(u_1[k][j-1][i+2]-u_1[k][j-1][i-2]) + c1*(u_1[k][j-1][i+1]-u_1[k][j-1][i-1]))); 
+
+	r1 += c2*(la[k][j][i+2]*met_0[k][j][i+2]*met_0[k][j][i+2]*(c2*(u_1[k][j+2][i+2]-u_1[k][j-2][i+2]) + c1*(u_1[k][j+1][i+2]-u_1[k][j-1][i+2])) - la[k][j][i-2]*met_0[k][j][i-2]*met_0[k][j][i-2]*(c2*(u_1[k][j+2][i-2]-u_1[k][j-2][i-2])+ c1*(u_1[k][j+1][i-2]-u_1[k][j-1][i-2]))) + c1*(la[k][j][i+1]*met_0[k][j][i+1]*met_0[k][j][i+1]*(c2*(u_1[k][j+2][i+1]-u_1[k][j-2][i+1]) + c1*(u_1[k][j+1][i+1]-u_1[k][j-1][i+1])) - la[k][j][i-1]*met_0[k][j][i-1]*met_0[k][j][i-1]*(c2*(u_1[k][j+2][i-1]-u_1[k][j-2][i-1]) + c1*(u_1[k][j+1][i-1]-u_1[k][j-1][i-1]))); 
+
+	r1 += c2*((2*mu[k+2][j][i]+la[k+2][j][i])*met_1[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_0[k+2][j][i+2]-u_0[k+2][j][i-2]) + c1*(u_0[k+2][j][i+1]-u_0[k+2][j][i-1]))*strx[i]*istry + mu[k+2][j][i]*met_2[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_1[k+2][j][i+2]-u_1[k+2][j][i-2]) + c1*(u_1[k+2][j][i+1]-u_1[k+2][j][i-1])) + mu[k+2][j][i]*met_3[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_2[k+2][j][i+2]-u_2[k+2][j][i-2]) + c1*(u_2[k+2][j][i+1]-u_2[k+2][j][i-1]))*istry - ((2*mu[k-2][j][i]+la[k-2][j][i])*met_1[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_0[k-2][j][i+2]-u_0[k-2][j][i-2]) + c1*(u_0[k-2][j][i+1]-u_0[k-2][j][i-1]))*strx[i]*istry  + mu[k-2][j][i]*met_2[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_1[k-2][j][i+2]-u_1[k-2][j][i-2]) + c1*(u_1[k-2][j][i+1]-u_1[k-2][j][i-1])) + mu[k-2][j][i]*met_3[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_2[k-2][j][i+2]-u_2[k-2][j][i-2]) + c1*(u_2[k-2][j][i+1]-u_2[k-2][j][i-1]))*istry ));
+
+	r1 += c1*((2*mu[k+1][j][i]+la[k+1][j][i])*met_1[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_0[k+1][j][i+2]-u_0[k+1][j][i-2]) + c1*(u_0[k+1][j][i+1]-u_0[k+1][j][i-1]))*strx[i]*istry + mu[k+1][j][i]*met_2[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_1[k+1][j][i+2]-u_1[k+1][j][i-2]) + c1*(u_1[k+1][j][i+1]-u_1[k+1][j][i-1])) + mu[k+1][j][i]*met_3[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_2[k+1][j][i+2]-u_2[k+1][j][i-2]) + c1*(u_2[k+1][j][i+1]-u_2[k+1][j][i-1]))*istry - ((2*mu[k-1][j][i]+la[k-1][j][i])*met_1[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_0[k-1][j][i+2]-u_0[k-1][j][i-2]) + c1*(u_0[k-1][j][i+1]-u_0[k-1][j][i-1]))*strx[i]*istry  + mu[k-1][j][i]*met_2[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_1[k-1][j][i+2]-u_1[k-1][j][i-2]) + c1*(u_1[k-1][j][i+1]-u_1[k-1][j][i-1])) + mu[k-1][j][i]*met_3[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_2[k-1][j][i+2]-u_2[k-1][j][i-2]) + c1*(u_2[k-1][j][i+1]-u_2[k-1][j][i-1]))*istry)); 
+
+	r1 += (c2*((2*mu[k][j][i+2]+la[k][j][i+2])*met_1[k][j][i+2]*met_0[k][j][i+2]*(c2*(u_0[k+2][j][i+2]-u_0[k-2][j][i+2]) + c1*(u_0[k+1][j][i+2]-u_0[k-1][j][i+2]))*strx[i+2] + la[k][j][i+2]*met_2[k][j][i+2]*met_0[k][j][i+2]*(c2*(u_1[k+2][j][i+2]-u_1[k-2][j][i+2]) + c1*(u_1[k+1][j][i+2]-u_1[k-1][j][i+2]))*stry[j] + la[k][j][i+2]*met_3[k][j][i+2]*met_0[k][j][i+2]*(c2*(u_2[k+2][j][i+2]-u_2[k-2][j][i+2]) + c1*(u_2[k+1][j][i+2]-u_2[k-1][j][i+2])) - ((2*mu[k][j][i-2]+la[k][j][i-2])*met_1[k][j][i-2]*met_0[k][j][i-2]*(c2*(u_0[k+2][j][i-2]-u_0[k-2][j][i-2]) + c1*(u_0[k+1][j][i-2]-u_0[k-1][j][i-2]))*strx[i-2] + la[k][j][i-2]*met_2[k][j][i-2]*met_0[k][j][i-2]*(c2*(u_1[k+2][j][i-2]-u_1[k-2][j][i-2]) + c1*(u_1[k+1][j][i-2]-u_1[k-1][j][i-2]))*stry[j] + la[k][j][i-2]*met_3[k][j][i-2]*met_0[k][j][i-2]*(c2*(u_2[k+2][j][i-2]-u_2[k-2][j][i-2]) + c1*(u_2[k+1][j][i-2]-u_2[k-1][j][i-2])))) + c1*((2*mu[k][j][i+1]+la[k][j][i+1])*met_1[k][j][i+1]*met_0[k][j][i+1]*(c2*(u_0[k+2][j][i+1]-u_0[k-2][j][i+1]) + c1*(u_0[k+1][j][i+1]-u_0[k-1][j][i+1]))*strx[i+1] + la[k][j][i+1]*met_2[k][j][i+1]*met_0[k][j][i+1]*(c2*(u_1[k+2][j][i+1]-u_1[k-2][j][i+1]) + c1*(u_1[k+1][j][i+1]-u_1[k-1][j][i+1]))*stry[j] + la[k][j][i+1]*met_3[k][j][i+1]*met_0[k][j][i+1]*(c2*(u_2[k+2][j][i+1]-u_2[k-2][j][i+1]) + c1*(u_2[k+1][j][i+1]-u_2[k-1][j][i+1])) - ((2*mu[k][j][i-1]+la[k][j][i-1])*met_1[k][j][i-1]*met_0[k][j][i-1]*(c2*(u_0[k+2][j][i-1]-u_0[k-2][j][i-1]) + c1*(u_0[k+1][j][i-1]-u_0[k-1][j][i-1]))*strx[i-1] + la[k][j][i-1]*met_2[k][j][i-1]*met_0[k][j][i-1]*(c2*(u_1[k+2][j][i-1]-u_1[k-2][j][i-1]) + c1*(u_1[k+1][j][i-1]-u_1[k-1][j][i-1]))*stry[j] + la[k][j][i-1]*met_3[k][j][i-1]*met_0[k][j][i-1]*(c2*(u_2[k+2][j][i-1]-u_2[k-2][j][i-1]) + c1*(u_2[k+1][j][i-1]-u_2[k-1][j][i-1])))))*istry; 
+
+	r1 += c2*(mu[k+2][j][i]*met_2[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_0[k+2][j+2][i]-u_0[k+2][j-2][i]) + c1*(u_0[k+2][j+1][i]-u_0[k+2][j-1][i]))*stry[j]*istrx + la[k+2][j][i]*met_1[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_1[k+2][j+2][i]-u_1[k+2][j-2][i]) + c1*(u_1[k+2][j+1][i]-u_1[k+2][j-1][i])) - (mu[k-2][j][i]*met_2[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_0[k-2][j+2][i]-u_0[k-2][j-2][i]) + c1*(u_0[k-2][j+1][i]-u_0[k-2][j-1][i]))*stry[j]*istrx  + la[k-2][j][i]*met_1[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_1[k-2][j+2][i]-u_1[k-2][j-2][i]) + c1*(u_1[k-2][j+1][i]-u_1[k-2][j-1][i]))));
+
+	r1 += c1*(mu[k+1][j][i]*met_2[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_0[k+1][j+2][i]-u_0[k+1][j-2][i]) + c1*(u_0[k+1][j+1][i]-u_0[k+1][j-1][i]))*stry[j]*istrx  + la[k+1][j][i]*met_1[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_1[k+1][j+2][i]-u_1[k+1][j-2][i]) + c1*(u_1[k+1][j+1][i]-u_1[k+1][j-1][i])) - (mu[k-1][j][i]*met_2[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_0[k-1][j+2][i]-u_0[k-1][j-2][i]) + c1*(u_0[k-1][j+1][i]-u_0[k-1][j-1][i]))*stry[j]*istrx  + la[k-1][j][i]*met_1[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_1[k-1][j+2][i]-u_1[k-1][j-2][i]) + c1*(u_1[k-1][j+1][i]-u_1[k-1][j-1][i])))); 
+
+	r1 += c2*(mu[k][j+2][i]*met_2[k][j+2][i]*met_0[k][j+2][i]*(c2*(u_0[k+2][j+2][i]-u_0[k-2][j+2][i]) + c1*(u_0[k+1][j+2][i]-u_0[k-1][j+2][i]))*stry[j+2]*istrx + mu[k][j+2][i]*met_1[k][j+2][i]*met_0[k][j+2][i]*(c2*(u_1[k+2][j+2][i]-u_1[k-2][j+2][i]) + c1*(u_1[k+1][j+2][i]-u_1[k-1][j+2][i])) - (mu[k][j-2][i]*met_2[k][j-2][i]*met_0[k][j-2][i]*(c2*(u_0[k+2][j-2][i]-u_0[k-2][j-2][i]) + c1*(u_0[k+1][j-2][i]-u_0[k-1][j-2][i]))*stry[j-2]*istrx  + mu[k][j-2][i]*met_1[k][j-2][i]*met_0[k][j-2][i]*(c2*(u_1[k+2][j-2][i]-u_1[k-2][j-2][i]) + c1*(u_1[k+1][j-2][i]-u_1[k-1][j-2][i]))));
+
+	r1 += c1*(mu[k][j+1][i]*met_2[k][j+1][i]*met_0[k][j+1][i]*(c2*(u_0[k+2][j+1][i]-u_0[k-2][j+1][i]) + c1*(u_0[k+1][j+1][i]-u_0[k-1][j+1][i]))*stry[j+1]*istrx + mu[k][j+1][i]*met_1[k][j+1][i]*met_0[k][j+1][i]*(c2*(u_1[k+2][j+1][i]-u_1[k-2][j+1][i]) + c1*(u_1[k+1][j+1][i]-u_1[k-1][j+1][i])) - (mu[k][j-1][i]*met_2[k][j-1][i]*met_0[k][j-1][i]*(c2*(u_0[k+2][j-1][i]-u_0[k-2][j-1][i]) + c1*(u_0[k+1][j-1][i]-u_0[k-1][j-1][i]))*stry[j-1]*istrx    + mu[k][j-1][i]*met_1[k][j-1][i]*met_0[k][j-1][i]*(c2*(u_1[k+2][j-1][i]-u_1[k-2][j-1][i]) + c1*(u_1[k+1][j-1][i]-u_1[k-1][j-1][i])))); 
+
+	uacc_0[k][j][i] = a1*uacc_0[k][j][i] + r1*ijac;
+
+
+	cof1=(mu[k][j][i-2])*met_0[k][j][i-2]*met_0[k][j][i-2]*strx[i-2];
+	cof2=(mu[k][j][i-1])*met_0[k][j][i-1]*met_0[k][j][i-1]*strx[i-1];
+	cof3=(mu[k][j][i])*met_0[k][j][i]*met_0[k][j][i]*strx[i];
+	cof4=(mu[k][j][i+1])*met_0[k][j][i+1]*met_0[k][j][i+1]*strx[i+1];
+	cof5=(mu[k][j][i+2])*met_0[k][j][i+2]*met_0[k][j][i+2]*strx[i+2];
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r2 += i6* (mux1*(u_1[k][j][i-2]-u_1[k][j][i]) + mux2*(u_1[k][j][i-1]-u_1[k][j][i]) + mux3*(u_1[k][j][i+1]-u_1[k][j][i]) + mux4*(u_1[k][j][i+2]-u_1[k][j][i]))*istry;
+
+	cof1=(2*mu[k][j-2][i]+la[k][j-2][i])*met_0[k][j-2][i]*met_0[k][j-2][i]*stry[j-2];
+	cof2=(2*mu[k][j-1][i]+la[k][j-1][i])*met_0[k][j-1][i]*met_0[k][j-1][i]*stry[j-1];
+	cof3=(2*mu[k][j][i]+la[k][j][i])*met_0[k][j][i]*met_0[k][j][i]*stry[j];
+	cof4=(2*mu[k][j+1][i]+la[k][j+1][i])*met_0[k][j+1][i]*met_0[k][j+1][i]*stry[j+1];
+	cof5=(2*mu[k][j+2][i]+la[k][j+2][i])*met_0[k][j+2][i]*met_0[k][j+2][i]*stry[j+2];
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r2 += i6* (mux1*(u_1[k][j-2][i]-u_1[k][j][i]) + mux2*(u_1[k][j-1][i]-u_1[k][j][i]) + mux3*(u_1[k][j+1][i]-u_1[k][j][i]) + mux4*(u_1[k][j+2][i]-u_1[k][j][i]))*istrx; 
+	cof1=(mu[k-2][j][i]+la[k-2][j][i])*met_1[k-2][j][i]*met_2[k-2][j][i];
+	cof2=(mu[k-1][j][i]+la[k-1][j][i])*met_1[k-1][j][i]*met_2[k-1][j][i];
+	cof3=(mu[k][j][i]+  la[k][j][i])*met_1[k][j][i]*  met_2[k][j][i];
+	cof4=(mu[k+1][j][i]+la[k+1][j][i])*met_1[k+1][j][i]*met_2[k+1][j][i];
+	cof5=(mu[k+2][j][i]+la[k+2][j][i])*met_1[k+2][j][i]*met_2[k+2][j][i];
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r2 += i6* (mux1*(u_0[k-2][j][i]-u_0[k][j][i]) + mux2*(u_0[k-1][j][i]-u_0[k][j][i]) + mux3*(u_0[k+1][j][i]-u_0[k][j][i]) + mux4*(u_0[k+2][j][i]-u_0[k][j][i]));
+	cof1 = (2*mu[k-2][j][i]+la[k-2][j][i])*met_2[k-2][j][i]*stry[j]*met_2[k-2][j][i]*stry[j] +    mu[k-2][j][i]*(met_1[k-2][j][i]*strx[i]*met_1[k-2][j][i]*strx[i]+ met_3[k-2][j][i]*met_3[k-2][j][i]);
+	cof2 = (2*mu[k-1][j][i]+la[k-1][j][i])*met_2[k-1][j][i]*stry[j]*met_2[k-1][j][i]*stry[j] + mu[k-1][j][i]*(met_1[k-1][j][i]*strx[i]*met_1[k-1][j][i]*strx[i]+ met_3[k-1][j][i]*met_3[k-1][j][i]);
+	cof3 = (2*mu[k][j][i]+la[k][j][i])*met_2[k][j][i]*stry[j]*met_2[k][j][i]*stry[j] + mu[k][j][i]*(met_1[k][j][i]*strx[i]*met_1[k][j][i]*strx[i]+ met_3[k][j][i]*met_3[k][j][i]);
+	cof4 = (2*mu[k+1][j][i]+la[k+1][j][i])*met_2[k+1][j][i]*stry[j]*met_2[k+1][j][i]*stry[j] +    mu[k+1][j][i]*(met_1[k+1][j][i]*strx[i]*met_1[k+1][j][i]*strx[i]+ met_3[k+1][j][i]*met_3[k+1][j][i]);
+	cof5 = (2*mu[k+2][j][i]+la[k+2][j][i])*met_2[k+2][j][i]*stry[j]*met_2[k+2][j][i]*stry[j] +    mu[k+2][j][i]*(met_1[k+2][j][i]*strx[i]*met_1[k+2][j][i]*strx[i]+ met_3[k+2][j][i]*met_3[k+2][j][i]);
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r2 += i6* (mux1*(u_1[k-2][j][i]-u_1[k][j][i]) + mux2*(u_1[k-1][j][i]-u_1[k][j][i]) + mux3*(u_1[k+1][j][i]-u_1[k][j][i]) + mux4*(u_1[k+2][j][i]-u_1[k][j][i]))*istrxy;
+	cof1=(mu[k-2][j][i]+la[k-2][j][i])*met_2[k-2][j][i]*met_3[k-2][j][i];
+	cof2=(mu[k-1][j][i]+la[k-1][j][i])*met_2[k-1][j][i]*met_3[k-1][j][i];
+	cof3=(mu[k][j][i]  +la[k][j][i])*met_2[k][j][i]*  met_3[k][j][i];
+	cof4=(mu[k+1][j][i]+la[k+1][j][i])*met_2[k+1][j][i]*met_3[k+1][j][i];
+	cof5=(mu[k+2][j][i]+la[k+2][j][i])*met_2[k+2][j][i]*met_3[k+2][j][i];
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r2 += i6* (mux1*(u_2[k-2][j][i]-u_2[k][j][i]) + mux2*(u_2[k-1][j][i]-u_2[k][j][i]) + mux3*(u_2[k+1][j][i]-u_2[k][j][i]) + mux4*(u_2[k+2][j][i]-u_2[k][j][i]))*istrx;
+
+	r2 += c2*(la[k][j+2][i]*met_0[k][j+2][i]*met_0[k][j+2][i]*(c2*(u_0[k][j+2][i+2]-u_0[k][j+2][i-2]) + c1*(u_0[k][j+2][i+1]-u_0[k][j+2][i-1])) - la[k][j-2][i]*met_0[k][j-2][i]*met_0[k][j-2][i]*(c2*(u_0[k][j-2][i+2]-u_0[k][j-2][i-2])+ c1*(u_0[k][j-2][i+1]-u_0[k][j-2][i-1]))) + c1*(la[k][j+1][i]*met_0[k][j+1][i]*met_0[k][j+1][i]*(c2*(u_0[k][j+1][i+2]-u_0[k][j+1][i-2]) + c1*(u_0[k][j+1][i+1]-u_0[k][j+1][i-1])) - la[k][j-1][i]*met_0[k][j-1][i]*met_0[k][j-1][i]*(c2*(u_0[k][j-1][i+2]-u_0[k][j-1][i-2]) + c1*(u_0[k][j-1][i+1]-u_0[k][j-1][i-1])));
+
+	r2 += c2*(mu[k][j][i+2]*met_0[k][j][i+2]*met_0[k][j][i+2]*(c2*(u_0[k][j+2][i+2]-u_0[k][j-2][i+2]) + c1*(u_0[k][j+1][i+2]-u_0[k][j-1][i+2])) - mu[k][j][i-2]*met_0[k][j][i-2]*met_0[k][j][i-2]*(c2*(u_0[k][j+2][i-2]-u_0[k][j-2][i-2])+ c1*(u_0[k][j+1][i-2]-u_0[k][j-1][i-2]))) + c1*(mu[k][j][i+1]*met_0[k][j][i+1]*met_0[k][j][i+1]*(c2*(u_0[k][j+2][i+1]-u_0[k][j-2][i+1]) + c1*(u_0[k][j+1][i+1]-u_0[k][j-1][i+1])) - mu[k][j][i-1]*met_0[k][j][i-1]*met_0[k][j][i-1]*(c2*(u_0[k][j+2][i-1]-u_0[k][j-2][i-1]) + c1*(u_0[k][j+1][i-1]-u_0[k][j-1][i-1]))); 
+
+	r2 += c2*((la[k+2][j][i])*met_2[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_0[k+2][j][i+2]-u_0[k+2][j][i-2]) + c1*(u_0[k+2][j][i+1]-u_0[k+2][j][i-1])) + mu[k+2][j][i]*met_1[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_1[k+2][j][i+2]-u_1[k+2][j][i-2]) + c1*(u_1[k+2][j][i+1]-u_1[k+2][j][i-1]))*strx[i]*istry - ((la[k-2][j][i])*met_2[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_0[k-2][j][i+2]-u_0[k-2][j][i-2]) + c1*(u_0[k-2][j][i+1]-u_0[k-2][j][i-1])) + mu[k-2][j][i]*met_1[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_1[k-2][j][i+2]-u_1[k-2][j][i-2]) + c1*(u_1[k-2][j][i+1]-u_1[k-2][j][i-1]))*strx[i]*istry ));
+
+	r2 += c1*((la[k+1][j][i])*met_2[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_0[k+1][j][i+2]-u_0[k+1][j][i-2]) + c1*(u_0[k+1][j][i+1]-u_0[k+1][j][i-1])) + mu[k+1][j][i]*met_1[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_1[k+1][j][i+2]-u_1[k+1][j][i-2]) + c1*(u_1[k+1][j][i+1]-u_1[k+1][j][i-1]))*strx[i]*istry - (la[k-1][j][i]*met_2[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_0[k-1][j][i+2]-u_0[k-1][j][i-2]) + c1*(u_0[k-1][j][i+1]-u_0[k-1][j][i-1])) + mu[k-1][j][i]*met_1[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_1[k-1][j][i+2]-u_1[k-1][j][i-2]) + c1*(u_1[k-1][j][i+1]-u_1[k-1][j][i-1]))*strx[i]*istry));
+
+	r2 += c2*((mu[k][j][i+2])*met_2[k][j][i+2]*met_0[k][j][i+2]*(c2*(u_0[k+2][j][i+2]-u_0[k-2][j][i+2]) + c1*(u_0[k+1][j][i+2]-u_0[k-1][j][i+2])) + mu[k][j][i+2]*met_1[k][j][i+2]*met_0[k][j][i+2]*(c2*(u_1[k+2][j][i+2]-u_1[k-2][j][i+2]) + c1*(u_1[k+1][j][i+2]-u_1[k-1][j][i+2]))*strx[i+2]*istry - (mu[k][j][i-2]*met_2[k][j][i-2]*met_0[k][j][i-2]*(c2*(u_0[k+2][j][i-2]-u_0[k-2][j][i-2]) + c1*(u_0[k+1][j][i-2]-u_0[k-1][j][i-2])) + mu[k][j][i-2]*met_1[k][j][i-2]*met_0[k][j][i-2]*(c2*(u_1[k+2][j][i-2]-u_1[k-2][j][i-2]) + c1*(u_1[k+1][j][i-2]-u_1[k-1][j][i-2]))*strx[i-2]*istry )); 
+
+	r2+= c1*((mu[k][j][i+1])*met_2[k][j][i+1]*met_0[k][j][i+1]*(c2*(u_0[k+2][j][i+1]-u_0[k-2][j][i+1]) + c1*(u_0[k+1][j][i+1]-u_0[k-1][j][i+1])) + mu[k][j][i+1]*met_1[k][j][i+1]*met_0[k][j][i+1]*(c2*(u_1[k+2][j][i+1]-u_1[k-2][j][i+1]) + c1*(u_1[k+1][j][i+1]-u_1[k-1][j][i+1]))*strx[i+1]*istry - (mu[k][j][i-1]*met_2[k][j][i-1]*met_0[k][j][i-1]*(c2*(u_0[k+2][j][i-1]-u_0[k-2][j][i-1]) + c1*(u_0[k+1][j][i-1]-u_0[k-1][j][i-1])) + mu[k][j][i-1]*met_1[k][j][i-1]*met_0[k][j][i-1]*(c2*(u_1[k+2][j][i-1]-u_1[k-2][j][i-1]) + c1*(u_1[k+1][j][i-1]-u_1[k-1][j][i-1]))*strx[i-1]*istry)); 
+
+	r2 += c2*(mu[k+2][j][i]*met_1[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_0[k+2][j+2][i]-u_0[k+2][j-2][i]) + c1*(u_0[k+2][j+1][i]-u_0[k+2][j-1][i])) + (2*mu[k+2][j][i]+la[k+2][j][i])*met_2[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_1[k+2][j+2][i]-u_1[k+2][j-2][i]) + c1*(u_1[k+2][j+1][i]-u_1[k+2][j-1][i]))*stry[j]*istrx +mu[k+2][j][i]*met_3[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_2[k+2][j+2][i]-u_2[k+2][j-2][i]) + c1*(u_2[k+2][j+1][i]-u_2[k+2][j-1][i]))*istrx - (mu[k-2][j][i]*met_1[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_0[k-2][j+2][i]-u_0[k-2][j-2][i]) + c1*(u_0[k-2][j+1][i]-u_0[k-2][j-1][i])) +(2*mu[k-2][j][i]+ la[k-2][j][i])*met_2[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_1[k-2][j+2][i]-u_1[k-2][j-2][i]) + c1*(u_1[k-2][j+1][i]-u_1[k-2][j-1][i]))*stry[j]*istrx + mu[k-2][j][i]*met_3[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_2[k-2][j+2][i]-u_2[k-2][j-2][i]) + c1*(u_2[k-2][j+1][i]-u_2[k-2][j-1][i]))*istrx ));
+
+	r2 += c1*(mu[k+1][j][i]*met_1[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_0[k+1][j+2][i]-u_0[k+1][j-2][i]) + c1*(u_0[k+1][j+1][i]-u_0[k+1][j-1][i])) + (2*mu[k+1][j][i]+la[k+1][j][i])*met_2[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_1[k+1][j+2][i]-u_1[k+1][j-2][i]) + c1*(u_1[k+1][j+1][i]-u_1[k+1][j-1][i]))*stry[j]*istrx + mu[k+1][j][i]*met_3[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_2[k+1][j+2][i]-u_2[k+1][j-2][i]) + c1*(u_2[k+1][j+1][i]-u_2[k+1][j-1][i]))*istrx - (mu[k-1][j][i]*met_1[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_0[k-1][j+2][i]-u_0[k-1][j-2][i]) + c1*(u_0[k-1][j+1][i]-u_0[k-1][j-1][i])) + (2*mu[k-1][j][i]+la[k-1][j][i])*met_2[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_1[k-1][j+2][i]-u_1[k-1][j-2][i]) + c1*(u_1[k-1][j+1][i]-u_1[k-1][j-1][i]))*stry[j]*istrx +  mu[k-1][j][i]*met_3[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_2[k-1][j+2][i]-u_2[k-1][j-2][i]) + c1*(u_2[k-1][j+1][i]-u_2[k-1][j-1][i]))*istrx)); 
+
+	r2 += c2*(la[k][j+2][i]*met_1[k][j+2][i]*met_0[k][j+2][i]*(c2*(u_0[k+2][j+2][i]-u_0[k-2][j+2][i]) + c1*(u_0[k+1][j+2][i]-u_0[k-1][j+2][i])) +(2*mu[k][j+2][i]+la[k][j+2][i])*met_2[k][j+2][i]*met_0[k][j+2][i]*(c2*(u_1[k+2][j+2][i]-u_1[k-2][j+2][i]) + c1*(u_1[k+1][j+2][i]-u_1[k-1][j+2][i]))*stry[j+2]*istrx + la[k][j+2][i]*met_3[k][j+2][i]*met_0[k][j+2][i]*(c2*(u_2[k+2][j+2][i]-u_2[k-2][j+2][i]) + c1*(u_2[k+1][j+2][i]-u_2[k-1][j+2][i]))*istrx - (la[k][j-2][i]*met_1[k][j-2][i]*met_0[k][j-2][i]*(c2*(u_0[k+2][j-2][i]-u_0[k-2][j-2][i]) + c1*(u_0[k+1][j-2][i]-u_0[k-1][j-2][i])) +(2*mu[k][j-2][i]+la[k][j-2][i])*met_2[k][j-2][i]*met_0[k][j-2][i]*(c2*(u_1[k+2][j-2][i]-u_1[k-2][j-2][i]) + c1*(u_1[k+1][j-2][i]-u_1[k-1][j-2][i]))*stry[j-2]*istrx + la[k][j-2][i]*met_3[k][j-2][i]*met_0[k][j-2][i]*(c2*(u_2[k+2][j-2][i]-u_2[k-2][j-2][i]) + c1*(u_2[k+1][j-2][i]-u_2[k-1][j-2][i]))*istrx));
+
+	r2 += c1*(la[k][j+1][i]*met_1[k][j+1][i]*met_0[k][j+1][i]*(c2*(u_0[k+2][j+1][i]-u_0[k-2][j+1][i]) + c1*(u_0[k+1][j+1][i]-u_0[k-1][j+1][i])) + (2*mu[k][j+1][i]+la[k][j+1][i])*met_2[k][j+1][i]*met_0[k][j+1][i]*(c2*(u_1[k+2][j+1][i]-u_1[k-2][j+1][i]) + c1*(u_1[k+1][j+1][i]-u_1[k-1][j+1][i]))*stry[j+1]*istrx +la[k][j+1][i]*met_3[k][j+1][i]*met_0[k][j+1][i]*(c2*(u_2[k+2][j+1][i]-u_2[k-2][j+1][i]) + c1*(u_2[k+1][j+1][i]-u_2[k-1][j+1][i]))*istrx - (la[k][j-1][i]*met_1[k][j-1][i]*met_0[k][j-1][i]*(c2*(u_0[k+2][j-1][i]-u_0[k-2][j-1][i]) + c1*(u_0[k+1][j-1][i]-u_0[k-1][j-1][i])) + (2*mu[k][j-1][i]+la[k][j-1][i])*met_2[k][j-1][i]*met_0[k][j-1][i]*(c2*(u_1[k+2][j-1][i]-u_1[k-2][j-1][i]) + c1*(u_1[k+1][j-1][i]-u_1[k-1][j-1][i]))*stry[j-1]*istrx + la[k][j-1][i]*met_3[k][j-1][i]*met_0[k][j-1][i]*(c2*(u_2[k+2][j-1][i]-u_2[k-2][j-1][i]) + c1*(u_2[k+1][j-1][i]-u_2[k-1][j-1][i]))*istrx ));
+
+	uacc_1[k][j][i] = a1*uacc_1[k][j][i] + r2*ijac;
+
+
+	cof1=(mu[k][j][i-2])*met_0[k][j][i-2]*met_0[k][j][i-2]*strx[i-2];
+	cof2=(mu[k][j][i-1])*met_0[k][j][i-1]*met_0[k][j][i-1]*strx[i-1];
+	cof3=(mu[k][j][i])*met_0[k][j][i]*met_0[k][j][i]*strx[i];
+	cof4=(mu[k][j][i+1])*met_0[k][j][i+1]*met_0[k][j][i+1]*strx[i+1];
+	cof5=(mu[k][j][i+2])*met_0[k][j][i+2]*met_0[k][j][i+2]*strx[i+2];
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r3 += i6* (mux1*(u_2[k][j][i-2]-u_2[k][j][i]) + mux2*(u_2[k][j][i-1]-u_2[k][j][i]) + mux3*(u_2[k][j][i+1]-u_2[k][j][i]) + mux4*(u_2[k][j][i+2]-u_2[k][j][i]))*istry;
+	cof1=(mu[k][j-2][i])*met_0[k][j-2][i]*met_0[k][j-2][i]*stry[j-2];
+	cof2=(mu[k][j-1][i])*met_0[k][j-1][i]*met_0[k][j-1][i]*stry[j-1];
+	cof3=(mu[k][j][i])*met_0[k][j][i]*met_0[k][j][i]*stry[j];
+	cof4=(mu[k][j+1][i])*met_0[k][j+1][i]*met_0[k][j+1][i]*stry[j+1];
+	cof5=(mu[k][j+2][i])*met_0[k][j+2][i]*met_0[k][j+2][i]*stry[j+2];
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r3 += i6* (mux1*(u_2[k][j-2][i]-u_2[k][j][i]) + mux2*(u_2[k][j-1][i]-u_2[k][j][i]) + mux3*(u_2[k][j+1][i]-u_2[k][j][i]) + mux4*(u_2[k][j+2][i]-u_2[k][j][i]))*istrx;
+	cof1=(mu[k-2][j][i]+la[k-2][j][i])*met_1[k-2][j][i]*met_3[k-2][j][i];
+	cof2=(mu[k-1][j][i]+la[k-1][j][i])*met_1[k-1][j][i]*met_3[k-1][j][i];
+	cof3=(mu[k][j][i]+la[k][j][i])*met_1[k][j][i]*met_3[k][j][i];
+	cof4=(mu[k+1][j][i]+la[k+1][j][i])*met_1[k+1][j][i]*met_3[k+1][j][i];
+	cof5=(mu[k+2][j][i]+la[k+2][j][i])*met_1[k+2][j][i]*met_3[k+2][j][i];
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r3 += i6* (mux1*(u_0[k-2][j][i]-u_0[k][j][i]) + mux2*(u_0[k-1][j][i]-u_0[k][j][i]) + mux3*(u_0[k+1][j][i]-u_0[k][j][i]) + mux4*(u_0[k+2][j][i]-u_0[k][j][i]))*istry;
+	cof1=(mu[k-2][j][i]+la[k-2][j][i])*met_2[k-2][j][i]*met_3[k-2][j][i];
+	cof2=(mu[k-1][j][i]+la[k-1][j][i])*met_2[k-1][j][i]*met_3[k-1][j][i];
+	cof3=(mu[k][j][i]+la[k][j][i])*met_2[k][j][i]*met_3[k][j][i];
+	cof4=(mu[k+1][j][i]+la[k+1][j][i])*met_2[k+1][j][i]*met_3[k+1][j][i];
+	cof5=(mu[k+2][j][i]+la[k+2][j][i])*met_2[k+2][j][i]*met_3[k+2][j][i];
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r3 += i6* (mux1*(u_1[k-2][j][i]-u_1[k][j][i]) + mux2*(u_1[k-1][j][i]-u_1[k][j][i]) + mux3*(u_1[k+1][j][i]-u_1[k][j][i]) + mux4*(u_1[k+2][j][i]-u_1[k][j][i]))*istrx;
+	cof1 = (2*mu[k-2][j][i]+la[k-2][j][i])*met_3[k-2][j][i]*met_3[k-2][j][i] + mu[k-2][j][i]*(met_1[k-2][j][i]*strx[i]*met_1[k-2][j][i]*strx[i]+ met_2[k-2][j][i]*stry[j]*met_2[k-2][j][i]*stry[j] );
+	cof2 = (2*mu[k-1][j][i]+la[k-1][j][i])*met_3[k-1][j][i]*met_3[k-1][j][i] + mu[k-1][j][i]*(met_1[k-1][j][i]*strx[i]*met_1[k-1][j][i]*strx[i]+ met_2[k-1][j][i]*stry[j]*met_2[k-1][j][i]*stry[j] );
+	cof3 = (2*mu[k][j][i]+la[k][j][i])*met_3[k][j][i]*met_3[k][j][i] + mu[k][j][i]*(met_1[k][j][i]*strx[i]*met_1[k][j][i]*strx[i]+ met_2[k][j][i]*stry[j]*met_2[k][j][i]*stry[j] );
+	cof4 = (2*mu[k+1][j][i]+la[k+1][j][i])*met_3[k+1][j][i]*met_3[k+1][j][i] + mu[k+1][j][i]*(met_1[k+1][j][i]*strx[i]*met_1[k+1][j][i]*strx[i]+ met_2[k+1][j][i]*stry[j]*met_2[k+1][j][i]*stry[j]);
+	cof5 = (2*mu[k+2][j][i]+la[k+2][j][i])*met_3[k+2][j][i]*met_3[k+2][j][i] + mu[k+2][j][i]*(met_1[k+2][j][i]*strx[i]*met_1[k+2][j][i]*strx[i]+ met_2[k+2][j][i]*stry[j]*met_2[k+2][j][i]*stry[j] );
+	mux1 = cof2 -tf*(cof3+cof1);
+	mux2 = cof1 + cof4+3*(cof3+cof2);
+	mux3 = cof2 + cof5+3*(cof4+cof3);
+	mux4 = cof4-tf*(cof3+cof5);
+
+	r3 += i6* (mux1*(u_2[k-2][j][i]-u_2[k][j][i]) + mux2*(u_2[k-1][j][i]-u_2[k][j][i]) + mux3*(u_2[k+1][j][i]-u_2[k][j][i]) + mux4*(u_2[k+2][j][i]-u_2[k][j][i]))*istrxy;
+
+	r3 += c2*((la[k+2][j][i])*met_3[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_0[k+2][j][i+2]-u_0[k+2][j][i-2]) + c1*(u_0[k+2][j][i+1]-u_0[k+2][j][i-1]))*istry + mu[k+2][j][i]*met_1[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_2[k+2][j][i+2]-u_2[k+2][j][i-2]) + c1*(u_2[k+2][j][i+1]-u_2[k+2][j][i-1]))*strx[i]*istry - ((la[k-2][j][i])*met_3[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_0[k-2][j][i+2]-u_0[k-2][j][i-2]) + c1*(u_0[k-2][j][i+1]-u_0[k-2][j][i-1]))*istry  + mu[k-2][j][i]*met_1[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_2[k-2][j][i+2]-u_2[k-2][j][i-2]) + c1*(u_2[k-2][j][i+1]-u_2[k-2][j][i-1]))*strx[i]*istry ));
+
+	r3 += c1*((la[k+1][j][i])*met_3[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_0[k+1][j][i+2]-u_0[k+1][j][i-2]) + c1*(u_0[k+1][j][i+1]-u_0[k+1][j][i-1]))*istry  + mu[k+1][j][i]*met_1[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_2[k+1][j][i+2]-u_2[k+1][j][i-2]) + c1*(u_2[k+1][j][i+1]-u_2[k+1][j][i-1]))*strx[i]*istry - (la[k-1][j][i]*met_3[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_0[k-1][j][i+2]-u_0[k-1][j][i-2]) + c1*(u_0[k-1][j][i+1]-u_0[k-1][j][i-1]))*istry  + mu[k-1][j][i]*met_1[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_2[k-1][j][i+2]-u_2[k-1][j][i-2]) + c1*(u_2[k-1][j][i+1]-u_2[k-1][j][i-1]))*strx[i]*istry));
+
+	r3 += istry*(c2*((mu[k][j][i+2])*met_3[k][j][i+2]*met_0[k][j][i+2]*(c2*(u_0[k+2][j][i+2]-u_0[k-2][j][i+2]) + c1*(u_0[k+1][j][i+2]-u_0[k-1][j][i+2])) + mu[k][j][i+2]*met_1[k][j][i+2]*met_0[k][j][i+2]*(c2*(u_2[k+2][j][i+2]-u_2[k-2][j][i+2]) + c1*(u_2[k+1][j][i+2]-u_2[k-1][j][i+2]))*strx[i+2] - (mu[k][j][i-2]*met_3[k][j][i-2]*met_0[k][j][i-2]*(c2*(u_0[k+2][j][i-2]-u_0[k-2][j][i-2]) + c1*(u_0[k+1][j][i-2]-u_0[k-1][j][i-2])) + mu[k][j][i-2]*met_1[k][j][i-2]*met_0[k][j][i-2]*(c2*(u_2[k+2][j][i-2]-u_2[k-2][j][i-2]) + c1*(u_2[k+1][j][i-2]-u_2[k-1][j][i-2]))*strx[i-2])) + c1*((mu[k][j][i+1])*met_3[k][j][i+1]*met_0[k][j][i+1]*(c2*(u_0[k+2][j][i+1]-u_0[k-2][j][i+1]) + c1*(u_0[k+1][j][i+1]-u_0[k-1][j][i+1])) + mu[k][j][i+1]*met_1[k][j][i+1]*met_0[k][j][i+1]*(c2*(u_2[k+2][j][i+1]-u_2[k-2][j][i+1]) + c1*(u_2[k+1][j][i+1]-u_2[k-1][j][i+1]))*strx[i+1] - (mu[k][j][i-1]*met_3[k][j][i-1]*met_0[k][j][i-1]*(c2*(u_0[k+2][j][i-1]-u_0[k-2][j][i-1]) + c1*(u_0[k+1][j][i-1]-u_0[k-1][j][i-1])) + mu[k][j][i-1]*met_1[k][j][i-1]*met_0[k][j][i-1]*(c2*(u_2[k+2][j][i-1]-u_2[k-2][j][i-1]) + c1*(u_2[k+1][j][i-1]-u_2[k-1][j][i-1]))*strx[i-1])));
+
+	r3 +=   c2*(mu[k+2][j][i]*met_2[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_2[k+2][j+2][i]-u_2[k+2][j-2][i]) + c1*(u_2[k+2][j+1][i]-u_2[k+2][j-1][i]))*stry[j]*istrx + la[k+2][j][i]*met_3[k+2][j][i]*met_0[k+2][j][i]*(c2*(u_1[k+2][j+2][i]-u_1[k+2][j-2][i]) + c1*(u_1[k+2][j+1][i]-u_1[k+2][j-1][i]))*istrx - (mu[k-2][j][i]*met_2[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_2[k-2][j+2][i]-u_2[k-2][j-2][i]) + c1*(u_2[k-2][j+1][i]-u_2[k-2][j-1][i]))*stry[j]*istrx  + la[k-2][j][i]*met_3[k-2][j][i]*met_0[k-2][j][i]*(c2*(u_1[k-2][j+2][i]-u_1[k-2][j-2][i]) + c1*(u_1[k-2][j+1][i]-u_1[k-2][j-1][i]))*istrx));
+
+	r3 += c1*(mu[k+1][j][i]*met_2[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_2[k+1][j+2][i]-u_2[k+1][j-2][i]) + c1*(u_2[k+1][j+1][i]-u_2[k+1][j-1][i]))*stry[j]*istrx  + la[k+1][j][i]*met_3[k+1][j][i]*met_0[k+1][j][i]*(c2*(u_1[k+1][j+2][i]-u_1[k+1][j-2][i]) + c1*(u_1[k+1][j+1][i]-u_1[k+1][j-1][i]))*istrx - (mu[k-1][j][i]*met_2[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_2[k-1][j+2][i]-u_2[k-1][j-2][i]) + c1*(u_2[k-1][j+1][i]-u_2[k-1][j-1][i]))*stry[j]*istrx  + la[k-1][j][i]*met_3[k-1][j][i]*met_0[k-1][j][i]*(c2*(u_1[k-1][j+2][i]-u_1[k-1][j-2][i]) + c1*(u_1[k-1][j+1][i]-u_1[k-1][j-1][i]))*istrx)); 
+
+	r3 +=  istrx*(c2*(mu[k][j+2][i]*met_2[k][j+2][i]*met_0[k][j+2][i]*(c2*(u_2[k+2][j+2][i]-u_2[k-2][j+2][i]) + c1*(u_2[k+1][j+2][i]-u_2[k-1][j+2][i]))*stry[j+2] + mu[k][j+2][i]*met_3[k][j+2][i]*met_0[k][j+2][i]*(c2*(u_1[k+2][j+2][i]-u_1[k-2][j+2][i]) + c1*(u_1[k+1][j+2][i]-u_1[k-1][j+2][i])) - (mu[k][j-2][i]*met_2[k][j-2][i]*met_0[k][j-2][i]*(c2*(u_2[k+2][j-2][i]-u_2[k-2][j-2][i]) + c1*(u_2[k+1][j-2][i]-u_2[k-1][j-2][i]))*stry[j-2] + mu[k][j-2][i]*met_3[k][j-2][i]*met_0[k][j-2][i]*(c2*(u_1[k+2][j-2][i]-u_1[k-2][j-2][i]) + c1*(u_1[k+1][j-2][i]-u_1[k-1][j-2][i])))) + c1*(mu[k][j+1][i]*met_2[k][j+1][i]*met_0[k][j+1][i]*(c2*(u_2[k+2][j+1][i]-u_2[k-2][j+1][i]) + c1*(u_2[k+1][j+1][i]-u_2[k-1][j+1][i]))*stry[j+1] + mu[k][j+1][i]*met_3[k][j+1][i]*met_0[k][j+1][i]*(c2*(u_1[k+2][j+1][i]-u_1[k-2][j+1][i]) + c1*(u_1[k+1][j+1][i]-u_1[k-1][j+1][i])) - (mu[k][j-1][i]*met_2[k][j-1][i]*met_0[k][j-1][i]*(c2*(u_2[k+2][j-1][i]-u_2[k-2][j-1][i]) + c1*(u_2[k+1][j-1][i]-u_2[k-1][j-1][i]))*stry[j-1] + mu[k][j-1][i]*met_3[k][j-1][i]*met_0[k][j-1][i]*(c2*(u_1[k+2][j-1][i]-u_1[k-2][j-1][i]) + c1*(u_1[k+1][j-1][i]-u_1[k-1][j-1][i]))))); 
+
+	uacc_2[k][j][i] = a1*uacc_2[k][j][i] + r3*ijac;
+
+
+}
+
+sw4 (uacc_0, uacc_1, uacc_2, u_0, u_1, u_2, mu, la, met_0, met_1, met_2, met_3, jac, strx, stry);
+copyout uacc_0, uacc_1, uacc_2;

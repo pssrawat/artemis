@@ -1,0 +1,72 @@
+parameter L,M,N;
+iterator k, j, i;
+double up_0[L,M,N], up_1[L,M,N], up_2[L,M,N], u_0[L,M,N], u_1[L,M,N], u_2[L,M,N], um_0[L,M,N], um_1[L,M,N], um_2[L,M,N], rho[L,M,N], strx[N], stry[M], strz[L], dcx[N], dcy[M], dcz[L], cox[N], coy[M], coz[L];
+copyin up_0, up_1, up_2, u_0, u_1, u_2, um_0, um_1, um_2, rho;
+constant strx, stry, strz, dcx, dcy, dcz, cox, coy, coz; 
+
+stencil addsg (up_0, up_1, up_2, u_0, u_1, u_2, um_0, um_1, um_2, rho, strx, stry, strz, dcx, dcy, dcz, cox, coy, coz) {
+	double beta = 0.625;
+	double birho;
+	double tmp_0[L,M,N];
+	double tmp_1[L,M,N];
+	double tmp_2[L,M,N];
+
+	shmem u_0, u_1, u_2, um_0, um_1, um_2;
+	gmem up_0, up_1, up_2, strx, stry, strz, dcx, dcy, dcz, cox, coy, coz;
+
+	birho = 0.5*beta/rho[k][j][i];
+	tmp_0[k][j][i] = u_0[k][j][i] - um_0[k][j][i];
+	tmp_1[k][j][i] = u_1[k][j][i] - um_1[k][j][i];
+	tmp_2[k][j][i] = u_2[k][j][i] - um_2[k][j][i];
+
+	up_0[k][j][i] += birho*(strx[i]*coy[j]*coz[k]*(
+			(rho[k][j][i+2]*dcx[i+2]+rho[k][j][i+1]*dcx[i+1])*(tmp_0[k][j][i+3]-3*tmp_0[k][j][i+2]+3*tmp_0[k][j][i+1]-tmp_0[k][j][i])-
+			3*(rho[k][j][i+1]*dcx[i+1]+rho[k][j][i]*dcx[i])*(tmp_0[k][j][i+2]-3*tmp_0[k][j][i+1]+3*tmp_0[k][j][i]-tmp_0[k][j][i-1])+
+			3*(rho[k][j][i]*dcx[i]+rho[k][j][i-1]*dcx[i-1])*(tmp_0[k][j][i+1]-3*tmp_0[k][j][i]+3*tmp_0[k][j][i-1]-tmp_0[k][j][i-2])-
+			(rho[k][j][i-1]*dcx[i-1]+rho[k][j][i-2]*dcx[i-2])*(tmp_0[k][j][i]-3*tmp_0[k][j][i-1]+3*tmp_0[k][j][i-2]-tmp_0[k][j][i-3])) +  
+			stry[j]*cox[i]*coz[k]*(
+			(rho[k][j+2][i]*dcy[j+2]+rho[k][j+1][i]*dcy[j+1])*(tmp_0[k][j+3][i]-3*tmp_0[k][j+2][i]+3*tmp_0[k][j+1][i]-tmp_0[k][j][i])-
+			3*(rho[k][j+1][i]*dcy[j+1]+rho[k][j][i]*dcy[j])*(tmp_0[k][j+2][i] -3*tmp_0[k][j+1][i]+3*tmp_0[k][j][i]-tmp_0[k][j-1][i])+
+			3*(rho[k][j][i]*dcy[j]+rho[k][j-1][i]*dcy[j-1])*(tmp_0[k][j+1][i]-3*tmp_0[k][j][i]+3*tmp_0[k][j-1][i]-tmp_0[k][j-2][i])-
+			(rho[k][j-1][i]*dcy[j-1]+rho[k][j-2][i]*dcy[j-2])*(tmp_0[k][j][i]-3*tmp_0[k][j-1][i]+3*tmp_0[k][j-2][i]-tmp_0[k][j-3][i])) +  
+			strz[k]*cox[i]*coy[j]*(
+			(rho[k+2][j][i]*dcz[k+2]+rho[k+1][j][i]*dcz[k+1])*(tmp_0[k+3][j][i]-3*tmp_0[k+2][j][i]+3*tmp_0[k+1][j][i]-tmp_0[k][j][i])-
+			3*(rho[k+1][j][i]*dcz[k+1]+rho[k][j][i]*dcz[k])*(tmp_0[k+2][j][i]-3*tmp_0[k+1][j][i]+3*tmp_0[k][j][i]-tmp_0[k-1][j][i])+
+			3*(rho[k][j][i]*dcz[k]+rho[k-1][j][i]*dcz[k-1])*(tmp_0[k+1][j][i]-3*tmp_0[k][j][i]+3*tmp_0[k-1][j][i]-tmp_0[k-2][j][i])-
+			(rho[k-1][j][i]*dcz[k-1]+rho[k-2][j][i]*dcz[k-2])*(tmp_0[k][j][i]-3*tmp_0[k-1][j][i]+3*tmp_0[k-2][j][i]-tmp_0[k-3][j][i])));
+
+	up_1[k][j][i] += birho*(strx[i]*coy[j]*coz[k]*(
+			(rho[k][j][i+2]*dcx[i+2]+rho[k][j][i+1]*dcx[i+1])*(tmp_1[k][j][i+3]-3*tmp_1[k][j][i+2]+3*tmp_1[k][j][i+1]-tmp_1[k][j][i])-
+			3*(rho[k][j][i+1]*dcx[i+1]+rho[k][j][i]*dcx[i])*(tmp_1[k][j][i+2]-3*tmp_1[k][j][i+1]+3*tmp_1[k][j][i]-tmp_1[k][j][i-1])+
+			3*(rho[k][j][i]*dcx[i]+rho[k][j][i-1]*dcx[i-1])*(tmp_1[k][j][i+1]-3*tmp_1[k][j][i]+3*tmp_1[k][j][i-1]-tmp_1[k][j][i-2])-
+			(rho[k][j][i-1]*dcx[i-1]+rho[k][j][i-2]*dcx[i-2])*(tmp_1[k][j][i]-3*tmp_1[k][j][i-1]+3*tmp_1[k][j][i-2]-tmp_1[k][j][i-3])) +  
+			stry[j]*cox[i]*coz[k]*(
+			(rho[k][j+2][i]*dcy[j+2]+rho[k][j+1][i]*dcy[j+1])*(tmp_1[k][j+3][i]-3*tmp_1[k][j+2][i]+3*tmp_1[k][j+1][i]-tmp_1[k][j][i])-
+			3*(rho[k][j+1][i]*dcy[j+1]+rho[k][j][i]*dcy[j])*(tmp_1[k][j+2][i] -3*tmp_1[k][j+1][i]+3*tmp_1[k][j][i]-tmp_1[k][j-1][i])+
+			3*(rho[k][j][i]*dcy[j]+rho[k][j-1][i]*dcy[j-1])*(tmp_1[k][j+1][i]-3*tmp_1[k][j][i]+3*tmp_1[k][j-1][i]-tmp_1[k][j-2][i])-
+			(rho[k][j-1][i]*dcy[j-1]+rho[k][j-2][i]*dcy[j-2])*(tmp_1[k][j][i]-3*tmp_1[k][j-1][i]+3*tmp_1[k][j-2][i]-tmp_1[k][j-3][i])) + 
+			strz[k]*cox[i]*coy[j]*(
+			(rho[k+2][j][i]*dcz[k+2]+rho[k+1][j][i]*dcz[k+1])*(tmp_1[k+3][j][i]-3*tmp_1[k+2][j][i]+3*tmp_1[k+1][j][i]-tmp_1[k][j][i])-
+			3*(rho[k+1][j][i]*dcz[k+1]+rho[k][j][i]*dcz[k])*(tmp_1[k+2][j][i]-3*tmp_1[k+1][j][i]+3*tmp_1[k][j][i]-tmp_1[k-1][j][i])+
+			3*(rho[k][j][i]*dcz[k]+rho[k-1][j][i]*dcz[k-1])*(tmp_1[k+1][j][i]-3*tmp_1[k][j][i]+3*tmp_1[k-1][j][i]-tmp_1[k-2][j][i])-
+			(rho[k-1][j][i]*dcz[k-1]+rho[k-2][j][i]*dcz[k-2])*(tmp_1[k][j][i]-3*tmp_1[k-1][j][i]+3*tmp_1[k-2][j][i]-tmp_1[k-3][j][i])));
+
+	up_2[k][j][i] += birho*(strx[i]*coy[j]*coz[k]*(
+			(rho[k][j][i+2]*dcx[i+2]+rho[k][j][i+1]*dcx[i+1])*(tmp_2[k][j][i+3]-3*tmp_2[k][j][i+2]+3*tmp_2[k][j][i+1]-tmp_2[k][j][i])-
+			3*(rho[k][j][i+1]*dcx[i+1]+rho[k][j][i]*dcx[i])*(tmp_2[k][j][i+2]-3*tmp_2[k][j][i+1]+3*tmp_2[k][j][i]-tmp_2[k][j][i-1])+
+			3*(rho[k][j][i]*dcx[i]+rho[k][j][i-1]*dcx[i-1])*(tmp_2[k][j][i+1]-3*tmp_2[k][j][i]+3*tmp_2[k][j][i-1]-tmp_2[k][j][i-2])-
+			(rho[k][j][i-1]*dcx[i-1]+rho[k][j][i-2]*dcx[i-2])*(tmp_2[k][j][i]-3*tmp_2[k][j][i-1]+3*tmp_2[k][j][i-2]-tmp_2[k][j][i-3])) + 
+			stry[j]*cox[i]*coz[k]*(
+			(rho[k][j+2][i]*dcy[j+2]+rho[k][j+1][i]*dcy[j+1])*(tmp_2[k][j+3][i]-3*tmp_2[k][j+2][i]+3*tmp_2[k][j+1][i]-tmp_2[k][j][i])-
+			3*(rho[k][j+1][i]*dcy[j+1]+rho[k][j][i]*dcy[j])*(tmp_2[k][j+2][i] -3*tmp_2[k][j+1][i]+3*tmp_2[k][j][i]-tmp_2[k][j-1][i])+
+			3*(rho[k][j][i]*dcy[j]+rho[k][j-1][i]*dcy[j-1])*(tmp_2[k][j+1][i]-3*tmp_2[k][j][i]+3*tmp_2[k][j-1][i]-tmp_2[k][j-2][i])-
+			(rho[k][j-1][i]*dcy[j-1]+rho[k][j-2][i]*dcy[j-2])*(tmp_2[k][j][i]-3*tmp_2[k][j-1][i]+3*tmp_2[k][j-2][i]-tmp_2[k][j-3][i])) + 
+			strz[k]*cox[i]*coy[j]*(
+			(rho[k+2][j][i]*dcz[k+2]+rho[k+1][j][i]*dcz[k+1])*(tmp_2[k+3][j][i]-3*tmp_2[k+2][j][i]+3*tmp_2[k+1][j][i]-tmp_2[k][j][i])-
+			3*(rho[k+1][j][i]*dcz[k+1]+rho[k][j][i]*dcz[k])*(tmp_2[k+2][j][i]-3*tmp_2[k+1][j][i]+3*tmp_2[k][j][i]-tmp_2[k-1][j][i])+
+			3*(rho[k][j][i]*dcz[k]+rho[k-1][j][i]*dcz[k-1])*(tmp_2[k+1][j][i]-3*tmp_2[k][j][i]+3*tmp_2[k-1][j][i]-tmp_2[k-2][j][i])-
+			(rho[k-1][j][i]*dcz[k-1]+rho[k-2][j][i]*dcz[k-2])*(tmp_2[k][j][i]-3*tmp_2[k-1][j][i]+3*tmp_2[k-2][j][i]-tmp_2[k-3][j][i])));
+}
+
+addsg (up_0, up_1, up_2, u_0, u_1, u_2, um_0, um_1, um_2, rho, strx, stry, strz, dcx, dcy, dcz, cox, coy, coz);
+copyout up_0, up_1, up_2;

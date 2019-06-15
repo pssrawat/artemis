@@ -1,0 +1,69 @@
+parameter L, M, N;
+iterator k, j, i;
+double difflux_1[L,M,N], difflux_2[L,M,N], difflux_3[L,M,N], difflux_4[L,M,N], q_1[L,M,N], q_2[L,M,N], q_3[L,M,N], q_5[L,M,N], ux[L,M,N], uy[L,M,N], uz[L,M,N], vx[L,M,N], vy[L,M,N], vz[L,M,N], wx[L,M,N], wy[L,M,N], wz[L,M,N];
+
+copyin difflux_1, difflux_2, difflux_3, difflux_4, q_1, q_2, q_3, q_5, ux, uy, uz, vx, vy, vz, wx, wy, wz;
+
+stencil diffterm_1 (difflux_1, difflux_2, difflux_3, difflux_4, q_1, q_2, q_3, q_5, ux, uy, uz, vx, vy, vz, wx, wy, wz) {
+        double dxinv0 = 0.01;
+        double dxinv1 = 0.02;
+        double dxinv2 = 0.03;
+
+	[4:L-5,4:M-5,4:N-5] : ux[k][j][i] = (0.8 * (q_1[k][j][i+1] - q_1[k][j][i-1]) + -0.2 * (q_1[k][j][i+2] - q_1[k][j][i-2]) + 0.038 * (q_1[k][j][i+3] - q_1[k][j][i-3]) + -0.0035 * (q_1[k][j][i+4] - q_1[k][j][i-4])) * dxinv0;
+	[4:L-5,4:M-5,4:N-5] : vx[k][j][i] = (0.8 * (q_2[k][j][i+1] - q_2[k][j][i-1]) + -0.2 * (q_2[k][j][i+2] - q_2[k][j][i-2]) + 0.038 * (q_2[k][j][i+3] - q_2[k][j][i-3]) + -0.0035 * (q_2[k][j][i+4] - q_2[k][j][i-4])) * dxinv0;
+	[4:L-5,4:M-5,4:N-5] : wx[k][j][i] = (0.8 * (q_3[k][j][i+1] - q_3[k][j][i-1]) + -0.2 * (q_3[k][j][i+2] - q_3[k][j][i-2]) + 0.038 * (q_3[k][j][i+3] - q_3[k][j][i-3]) + -0.0035 * (q_3[k][j][i+4] - q_3[k][j][i-4])) * dxinv0;
+
+	[4:L-5,4:M-5,4:N-5] : uy[k][j][i] = (0.8 * (q_1[k][j+1][i] - q_1[k][j-1][i]) + -0.2 * (q_1[k][j+2][i] - q_1[k][j-2][i]) + 0.038 * (q_1[k][j+3][i] - q_1[k][j-3][i]) + -0.0035 * (q_1[k][j+4][i] - q_1[k][j-4][i])) * dxinv1;
+	[4:L-5,4:M-5,4:N-5] : vy[k][j][i] = (0.8 * (q_2[k][j+1][i] - q_2[k][j-1][i]) + -0.2 * (q_2[k][j+2][i] - q_2[k][j-2][i]) + 0.038 * (q_2[k][j+3][i] - q_2[k][j-3][i]) + -0.0035 * (q_2[k][j+4][i] - q_2[k][j-4][i])) * dxinv1;
+	[4:L-5,4:M-5,4:N-5] : wy[k][j][i] = (0.8 * (q_3[k][j+1][i] - q_3[k][j-1][i]) + -0.2 * (q_3[k][j+2][i] - q_3[k][j-2][i]) + 0.038 * (q_3[k][j+3][i] - q_3[k][j-3][i]) + -0.0035 * (q_3[k][j+4][i] - q_3[k][j-4][i])) * dxinv1;
+
+	[4:L-5,4:M-5,4:N-5] : uz[k][j][i] = (0.8 * (q_1[k+1][j][i] - q_1[k-1][j][i]) + -0.2 * (q_1[k+2][j][i] - q_1[k-2][j][i]) + 0.038 * (q_1[k+3][j][i] - q_1[k-3][j][i]) + -0.0035 * (q_1[k+4][j][i] - q_1[k-4][j][i])) * dxinv2;
+	[4:L-5,4:M-5,4:N-5] : vz[k][j][i] = (0.8 * (q_2[k+1][j][i] - q_2[k-1][j][i]) + -0.2 * (q_2[k+2][j][i] - q_2[k-2][j][i]) + 0.038 * (q_2[k+3][j][i] - q_2[k-3][j][i]) + -0.0035 * (q_2[k+4][j][i] - q_2[k-4][j][i])) * dxinv2;
+	[4:L-5,4:M-5,4:N-5] : wz[k][j][i] = (0.8 * (q_3[k+1][j][i] - q_3[k-1][j][i]) + -0.2 * (q_3[k+2][j][i] - q_3[k-2][j][i]) + 0.038 * (q_3[k+3][j][i] - q_3[k-3][j][i]) + -0.0035 * (q_3[k+4][j][i] - q_3[k-4][j][i])) * dxinv2;
+}
+
+stencil diffterm_2 (difflux_1, difflux_2, difflux_3, difflux_4, q_1, q_2, q_3, q_5, ux, uy, uz, vx, vy, vz, wx, wy, wz) {
+        double dxinv0 = 0.01;
+        double dxinv1 = 0.02;
+        double dxinv2 = 0.03;
+
+	double uxx, uyy, uzz, vyx, wzx, vxx, vyy, vzz, uxy, wzy, wxx, wyy, wzz, uxz, vyz, txx, tyy, tzz, divu, tauxx, tauyy, tauzz, tauxy, tauxz, tauyz, mechwork;
+	[4:L-5,4:M-5,4:N-5] : uxx = (-2.847 * q_1[k][j][i]+1.6 * (q_1[k][j][i+1] + q_1[k][j][i-1]) + -0.2 * (q_1[k][j][i+2] + q_1[k][j][i-2]) + 0.0253 * (q_1[k][j][i+3] + q_1[k][j][i-3]) + -0.0017 * (q_1[k][j][i+4] + q_1[k][j][i-4])) * (dxinv0*dxinv0);
+	[4:L-5,4:M-5,4:N-5] : uyy = (-2.847 * q_1[k][j][i]+1.6 * (q_1[k][j+1][i] + q_1[k][j-1][i]) + -0.2 * (q_1[k][j+2][i] + q_1[k][j-2][i]) + 0.0253 * (q_1[k][j+3][i] + q_1[k][j-3][i]) + -0.0017 * (q_1[k][j+4][i] + q_1[k][j-4][i])) * (dxinv1*dxinv1);
+	[4:L-5,4:M-5,4:N-5] : uzz = (-2.847 * q_1[k][j][i]+1.6 * (q_1[k+1][j][i] + q_1[k-1][j][i]) + -0.2 * (q_1[k+2][j][i] + q_1[k-2][j][i]) + 0.0253 * (q_1[k+3][j][i] + q_1[k-3][j][i]) + -0.0017 * (q_1[k+4][j][i] + q_1[k-4][j][i])) * (dxinv2*dxinv2);
+	[4:L-5,4:M-5,4:N-5] : vyx = (0.8 * (vy[k][j][i+1] - vy[k][j][i-1]) + -0.2 * (vy[k][j][i+2] - vy[k][j][i-2]) + 0.038 * (vy[k][j][i+3] - vy[k][j][i-3]) + -0.0035 * (vy[k][j][i+4] - vy[k][j][i-4])) * dxinv0;
+	[4:L-5,4:M-5,4:N-5] : wzx = (0.8 * (wz[k][j][i+1] - wz[k][j][i-1]) + -0.2 * (wz[k][j][i+2] - wz[k][j][i-2]) + 0.038 * (wz[k][j][i+3] - wz[k][j][i-3]) + -0.0035 * (wz[k][j][i+4] - wz[k][j][i-4])) * dxinv0;
+	[4:L-5,4:M-5,4:N-5] : difflux_1[k][j][i] = 0.3311 * (1.333 * uxx + uyy + uzz + 0.333 * (vyx + wzx));
+
+	[4:L-5,4:M-5,4:N-5] : vxx = (-2.847 * q_2[k][j][i]+1.6 * (q_2[k][j][i+1] + q_2[k][j][i-1]) + -0.2 * (q_2[k][j][i+2] + q_2[k][j][i-2]) + 0.0253 * (q_2[k][j][i+3] + q_2[k][j][i-3]) + -0.0017 * (q_2[k][j][i+4] + q_2[k][j][i-4])) * (dxinv0*dxinv0);
+	[4:L-5,4:M-5,4:N-5] : vyy = (-2.847 * q_2[k][j][i]+1.6 * (q_2[k][j+1][i] + q_2[k][j-1][i]) + -0.2 * (q_2[k][j+2][i] + q_2[k][j-2][i]) + 0.0253 * (q_2[k][j+3][i] + q_2[k][j-3][i]) + -0.0017 * (q_2[k][j+4][i] + q_2[k][j-4][i])) * (dxinv1*dxinv1);
+	[4:L-5,4:M-5,4:N-5] : vzz = (-2.847 * q_2[k][j][i]+1.6 * (q_2[k+1][j][i] + q_2[k-1][j][i]) + -0.2 * (q_2[k+2][j][i] + q_2[k-2][j][i]) + 0.0253 * (q_2[k+3][j][i] + q_2[k-3][j][i]) + -0.0017 * (q_2[k+4][j][i] + q_2[k-4][j][i])) * (dxinv2*dxinv2);
+	[4:L-5,4:M-5,4:N-5] : uxy = (0.8 * (ux[k][j+1][i] - ux[k][j-1][i]) + -0.2 * (ux[k][j+2][i] - ux[k][j-2][i]) + 0.038 * (ux[k][j+3][i] - ux[k][j-3][i]) + -0.0035 * (ux[k][j+4][i] - ux[k][j-4][i])) * dxinv1;
+	[4:L-5,4:M-5,4:N-5] : wzy = (0.8 * (wz[k][j+1][i] - wz[k][j-1][i]) + -0.2 * (wz[k][j+2][i] - wz[k][j-2][i]) + 0.038 * (wz[k][j+3][i] - wz[k][j-3][i]) + -0.0035 * (wz[k][j+4][i] - wz[k][j-4][i])) * dxinv1;
+	[4:L-5,4:M-5,4:N-5] : difflux_2[k][j][i] = 0.3311 * (vxx+1.333 * vyy + vzz + 0.333 * (uxy + wzy));
+
+	[4:L-5,4:M-5,4:N-5] : wxx = (-2.847 * q_3[k][j][i]+1.6 * (q_3[k][j][i+1] + q_3[k][j][i-1]) + -0.2 * (q_3[k][j][i+2] + q_3[k][j][i-2]) + 0.0253 * (q_3[k][j][i+3] + q_3[k][j][i-3]) + -0.0017 * (q_3[k][j][i+4] + q_3[k][j][i-4])) * (dxinv0*dxinv0);
+	[4:L-5,4:M-5,4:N-5] : wyy = (-2.847 * q_3[k][j][i]+1.6 * (q_3[k][j+1][i] + q_3[k][j-1][i]) + -0.2 * (q_3[k][j+2][i] + q_3[k][j-2][i]) + 0.0253 * (q_3[k][j+3][i] + q_3[k][j-3][i]) + -0.0017 * (q_3[k][j+4][i] + q_3[k][j-4][i])) * (dxinv1*dxinv1);
+	[4:L-5,4:M-5,4:N-5] : wzz = (-2.847 * q_3[k][j][i]+1.6 * (q_3[k+1][j][i] + q_3[k-1][j][i]) + -0.2 * (q_3[k+2][j][i] + q_3[k-2][j][i]) + 0.0253 * (q_3[k+3][j][i] + q_3[k-3][j][i]) + -0.0017 * (q_3[k+4][j][i] + q_3[k-4][j][i])) * (dxinv2*dxinv2);
+	[4:L-5,4:M-5,4:N-5] : uxz = (0.8 * (ux[k+1][j][i] - ux[k-1][j][i]) + -0.2 * (ux[k+2][j][i] - ux[k-2][j][i]) + 0.038 * (ux[k+3][j][i] - ux[k-3][j][i]) + -0.0035 * (ux[k+4][j][i] - ux[k-4][j][i])) * dxinv2;
+	[4:L-5,4:M-5,4:N-5] : vyz = (0.8 * (vy[k+1][j][i] - vy[k-1][j][i]) + -0.2 * (vy[k+2][j][i] - vy[k-2][j][i]) + 0.038 * (vy[k+3][j][i] - vy[k-3][j][i]) + -0.0035 * (vy[k+4][j][i] - vy[k-4][j][i])) * dxinv2;
+	[4:L-5,4:M-5,4:N-5] : difflux_3[k][j][i] = 0.3311 * (wxx + wyy+1.333 * wzz + 0.333 * (uxz + vyz));
+
+	[4:L-5,4:M-5,4:N-5] : txx = (-2.847 * q_5[k][j][i]+1.6 * (q_5[k][j][i+1] + q_5[k][j][i-1]) + -0.2 * (q_5[k][j][i+2] + q_5[k][j][i-2]) + 0.0253 * (q_5[k][j][i+3] + q_5[k][j][i-3]) + -0.0017 * (q_5[k][j][i+4] + q_5[k][j][i-4])) * (dxinv0*dxinv0);
+	[4:L-5,4:M-5,4:N-5] : tyy = (-2.847 * q_5[k][j][i]+1.6 * (q_5[k][j+1][i] + q_5[k][j-1][i]) + -0.2 * (q_5[k][j+2][i] + q_5[k][j-2][i]) + 0.0253 * (q_5[k][j+3][i] + q_5[k][j-3][i]) + -0.0017 * (q_5[k][j+4][i] + q_5[k][j-4][i])) * (dxinv1*dxinv1);
+	[4:L-5,4:M-5,4:N-5] : tzz = (-2.847 * q_5[k][j][i]+1.6 * (q_5[k+1][j][i] + q_5[k-1][j][i]) + -0.2 * (q_5[k+2][j][i] + q_5[k-2][j][i]) + 0.0253 * (q_5[k+3][j][i] + q_5[k-3][j][i]) + -0.0017 * (q_5[k+4][j][i] + q_5[k-4][j][i])) * (dxinv2*dxinv2);
+	[4:L-5,4:M-5,4:N-5] : divu = 0.666 * (ux[k][j][i] + vy[k][j][i] + wz[k][j][i]);
+	[4:L-5,4:M-5,4:N-5] : tauxx = 2.0 * ux[k][j][i] - divu;
+	[4:L-5,4:M-5,4:N-5] : tauyy = 2.0 * vy[k][j][i] - divu;
+	[4:L-5,4:M-5,4:N-5] : tauzz = 2.0 * wz[k][j][i] - divu;
+	[4:L-5,4:M-5,4:N-5] : tauxy = uy[k][j][i] + vx[k][j][i];
+	[4:L-5,4:M-5,4:N-5] : tauxz = uz[k][j][i] + wx[k][j][i];
+	[4:L-5,4:M-5,4:N-5] : tauyz = vz[k][j][i] + wy[k][j][i];
+	[4:L-5,4:M-5,4:N-5] : mechwork = tauxx * ux[k][j][i] + tauyy * vy[k][j][i] + tauzz * wz[k][j][i] + (tauxy*tauxy) + (tauxz*tauxz) + (tauyz*tauyz);
+	[4:L-5,4:M-5,4:N-5] : mechwork = 0.3311 * mechwork + difflux_1[k][j][i] * q_1[k][j][i] + difflux_2[k][j][i] * q_2[k][j][i] + difflux_3[k][j][i] * q_3[k][j][i];
+	[4:L-5,4:M-5,4:N-5] : difflux_4[k][j][i] = 0.7112 * (txx + tyy + tzz) + mechwork;
+}
+
+diffterm_1 (difflux_1, difflux_2, difflux_3, difflux_4, q_1, q_2, q_3, q_5, ux, uy, uz, vx, vy, vz, wx, wy, wz);
+diffterm_2 (difflux_1, difflux_2, difflux_3, difflux_4, q_1, q_2, q_3, q_5, ux, uy, uz, vx, vy, vz, wx, wy, wz);
+copyout difflux_1, difflux_2, difflux_3, difflux_4;

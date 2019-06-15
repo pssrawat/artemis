@@ -1,0 +1,112 @@
+parameter L, M, N;
+iterator k, j, i;
+double new_box_0[L,M,N], new_box_1[L,M,N], new_box_2[L,M,N], new_box_3[L,M,N], new_box_4[L,M,N], old_box_0[L,M,N], old_box_1[L,M,N], old_box_2[L,M,N], old_box_3[L,M,N], old_box_4[L,M,N], gx_0[L,M,N], gx_1[L,M,N], gx_2[L,M,N], gx_3[L,M,N], gx_4[L,M,N], gy_0[L,M,N], gy_1[L,M,N], gy_2[L,M,N], gy_3[L,M,N], gy_4[L,M,N], gz_0[L,M,N], gz_1[L,M,N], gz_2[L,M,N], gz_3[L,M,N], gz_4[L,M,N];
+
+copyin new_box_0, new_box_1, new_box_2, new_box_3, new_box_4, old_box_0, old_box_1, old_box_2, old_box_3, old_box_4, gx_0, gx_1, gx_2, gx_3, gx_4, gy_0, gy_1, gy_2, gy_3, gy_4, gz_0, gz_1, gz_2, gz_3, gz_4; 
+
+stencil miniflux (inout:new_box_0, inout:new_box_1, inout:new_box_2, inout:new_box_3, inout:new_box_4, old_box_0, old_box_1, old_box_2, old_box_3, old_box_4, gx_0, gx_1, gx_2, gx_3, gx_4, gy_0, gy_1, gy_2, gy_3, gy_4, gz_0, gz_1, gz_2, gz_3, gz_4) {
+
+        double factor1 = 1.0/12.0;
+        double factor2 = 2.0;
+
+	gx_0[k][j][i] = factor1*
+		(old_box_0[k][j][i-2]+
+		 7*(old_box_0[k][j][i-1]+old_box_0[k][j][i]) +
+		 old_box_0[k][j][i+1]);                           
+	gx_1[k][j][i] = factor1*
+		(old_box_1[k][j][i-2]+
+		 7*(old_box_1[k][j][i-1]+old_box_1[k][j][i]) +
+		 old_box_1[k][j][i+1]);          
+	gx_2[k][j][i] = factor1*
+		(old_box_2[k][j][i-2]+
+		 7*(old_box_2[k][j][i-1]+old_box_2[k][j][i]) +
+		 old_box_2[k][j][i+1]);
+	gx_3[k][j][i] = factor1*
+		(old_box_3[k][j][i-2]+
+		 7*(old_box_3[k][j][i-1]+old_box_3[k][j][i]) +
+		 old_box_3[k][j][i+1]);
+	gx_4[k][j][i] = factor1*
+		(old_box_4[k][j][i-2]+
+		 7*(old_box_4[k][j][i-1]+old_box_4[k][j][i]) +
+		 old_box_4[k][j][i+1]);       
+
+	gx_0[k][j][i] *= factor2*gx_2[k][j][i];
+	gx_1[k][j][i] *= factor2*gx_2[k][j][i];       
+	gx_3[k][j][i] *= factor2*gx_2[k][j][i];
+	gx_4[k][j][i] *= factor2*gx_2[k][j][i];
+	gx_2[k][j][i] *= factor2*gx_2[k][j][i];
+
+	new_box_0[k][j][i]+= gx_0[k][j][i+1]-gx_0[k][j][i];
+	new_box_1[k][j][i]+= gx_1[k][j][i+1]-gx_1[k][j][i];
+	new_box_2[k][j][i]+= gx_2[k][j][i+1]-gx_2[k][j][i];
+	new_box_3[k][j][i]+= gx_3[k][j][i+1]-gx_3[k][j][i];
+	new_box_4[k][j][i]+= gx_4[k][j][i+1]-gx_4[k][j][i];
+
+
+	gy_0[k][j][i] = factor1*
+		(old_box_0[k][j-2][i]+
+		 7*(old_box_0[k][j-1][i]+old_box_0[k][j][i]) +
+		 old_box_0[k][j+1][i]);                           
+	gy_1[k][j][i] = factor1*
+		(old_box_1[k][j-2][i]+
+		 7*(old_box_1[k][j-1][i]+old_box_1[k][j][i]) +
+		 old_box_1[k][j+1][i]);          
+	gy_2[k][j][i] = factor1*
+		(old_box_2[k][j-2][i]+
+		 7*(old_box_2[k][j-1][i]+old_box_2[k][j][i]) +
+		 old_box_2[k][j+1][i]);
+	gy_3[k][j][i] = factor1*
+		(old_box_3[k][j-2][i]+
+		 7*(old_box_3[k][j-1][i]+old_box_3[k][j][i]) +
+		 old_box_3[k][j+1][i]);
+	gy_4[k][j][i] = factor1*
+		(old_box_4[k][j-2][i]+
+		 7*(old_box_4[k][j-1][i]+old_box_4[k][j][i]) +
+		 old_box_4[k][j+1][i]);                                                                                                                  
+	gy_0[k][j][i] = factor2*gy_0[k][j][i]*gy_3[k][j][i];                          
+	gy_1[k][j][i] = factor2*gy_1[k][j][i]*gy_3[k][j][i];
+	gy_2[k][j][i] = factor2*gy_2[k][j][i]*gy_3[k][j][i];       
+	gy_4[k][j][i] = factor2*gy_4[k][j][i]*gy_3[k][j][i];
+	gy_3[k][j][i] = factor2*gy_3[k][j][i]*gy_3[k][j][i];                                                                                                                 
+	new_box_0[k][j][i]+= gy_0[k][j+1][i]-gy_0[k][j][i];
+	new_box_1[k][j][i]+= gy_1[k][j+1][i]-gy_1[k][j][i];
+	new_box_2[k][j][i]+= gy_2[k][j+1][i]-gy_2[k][j][i];
+	new_box_3[k][j][i]+= gy_3[k][j+1][i]-gy_3[k][j][i];
+	new_box_4[k][j][i]+= gy_4[k][j+1][i]-gy_4[k][j][i];
+
+
+	gz_0[k][j][i] = factor1*
+		(old_box_0[k-2][j][i]+
+		 7*(old_box_0[k-1][j][i]+old_box_0[k][j][i]) +
+		 old_box_0[k+1][j][i]);                           
+	gz_1[k][j][i] = factor1*
+		(old_box_1[k-2][j][i]+
+		 7*(old_box_1[k-1][j][i]+old_box_1[k][j][i]) +
+		 old_box_1[k+1][j][i]);          
+	gz_2[k][j][i] = factor1*
+		(old_box_2[k-2][j][i]+
+		 7*(old_box_2[k-1][j][i]+old_box_2[k][j][i]) +
+		 old_box_2[k+1][j][i]);
+	gz_3[k][j][i] = factor1*
+		(old_box_3[k-2][j][i]+
+		 7*(old_box_3[k-1][j][i]+old_box_3[k][j][i]) +
+		 old_box_3[k+1][j][i]);
+	gz_4[k][j][i] = factor1*
+		(old_box_4[k-2][j][i]+
+		 7*(old_box_4[k-1][j][i]+old_box_4[k][j][i]) +
+		 old_box_4[k+1][j][i]);                                                                                                                  
+	gz_0[k][j][i] = factor2*gz_0[k][j][i]*gz_4[k][j][i];                          
+	gz_1[k][j][i] = factor2*gz_1[k][j][i]*gz_4[k][j][i];
+	gz_2[k][j][i] = factor2*gz_2[k][j][i]*gz_4[k][j][i];       
+	gz_3[k][j][i] = factor2*gz_3[k][j][i]*gz_4[k][j][i];
+	gz_4[k][j][i] = factor2*gz_4[k][j][i]*gz_4[k][j][i];                                                                                                                 
+	new_box_0[k][j][i]+= gz_0[k+1][j][i]-gz_0[k][j][i];
+	new_box_1[k][j][i]+= gz_1[k+1][j][i]-gz_1[k][j][i];
+	new_box_2[k][j][i]+= gz_2[k+1][j][i]-gz_2[k][j][i];
+	new_box_3[k][j][i]+= gz_3[k+1][j][i]-gz_3[k][j][i];
+	new_box_4[k][j][i]+= gz_4[k+1][j][i]-gz_4[k][j][i];
+}
+
+miniflux (new_box_0, new_box_1, new_box_2, new_box_3, new_box_4, old_box_0, old_box_1, old_box_2, old_box_3, old_box_4, gx_0, gx_1, gx_2, gx_3, gx_4, gy_0, gy_1, gy_2, gy_3, gy_4, gz_0, gz_1, gz_2, gz_3, gz_4);
+
+copyout new_box_0, new_box_1, new_box_2, new_box_3, new_box_4;

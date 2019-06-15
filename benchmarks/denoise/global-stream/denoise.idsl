@@ -1,0 +1,27 @@
+parameter L, M, N;
+iterator k, j, i;
+double u[L,M,N], f[L,M,N], u0[L,M,N], g[L,M,N];
+
+copyin u, u0, f, g; 
+
+stencil denoise_1 (u, u0, f, inout:g) {
+	double epsilon = 1e-20;
+	gmem g, u0;
+	g[k][j][i] = 1.0/sqrt (epsilon + (u0[k][j][i] - u0[k][j+1][i])*(u0[k][j][i] - u0[k][j+1][i]) + (u0[k][j][i] - u0[k][j-1][i])*(u0[k][j][i] - u0[k][j-1][i]) + (u0[k][j][i] - u0[k][j][i+1])*(u0[k][j][i] - u0[k][j][i+1]) + (u0[k][j][i] - u0[k][j][i-1])*(u0[k][j][i] - u0[k][j][i-1]) + (u0[k][j][i] - u0[k+1][j][i])*(u0[k][j][i] - u0[k+1][j][i]) + (u0[k][j][i] - u0[k-1][j][i])*(u0[k][j][i] - u0[k-1][j][i]));
+}
+
+stencil denoise_2 (u, u0, f, g) {
+	double sigma2 = 0.05*0.05;
+	double gamma = 0.065/sigma2;
+	double r;
+	gmem u0, u, f, g;
+
+	r = u0[k][j][i]*f[k][j][i]/sigma2;
+	r = (r*(2.38944 + r*(0.950037 + r))) / (4.65314 + r*(2.57541 + r*(1.48937 + r)));
+	u[k][j][i] = (u0[k][j][i] + 5.0*(u0[k][j+1][i]*g[k][j+1][i] + u0[k][j-1][i]*g[k][j-1][i] + u0[k][j][i+1]*g[k][j][i+1] + u0[k][j][i-1]*g[k][j][i-1] + u0[k+1][j][i]*g[k+1][j][i] + u0[k-1][j][i]*g[k-1][j][i] + gamma*f[k][j][i]*r)) / (1.0 + 5.0*(g[k][j+1][i] + g[k][j-1][i] + g[k][j][i+1] + g[k][j][i-1] + g[k+1][j][i] + g[k-1][j][i] + gamma));
+}
+
+denoise_1 (u, u0, f, g);
+denoise_2 (u, u0, f, g);
+
+copyout u;

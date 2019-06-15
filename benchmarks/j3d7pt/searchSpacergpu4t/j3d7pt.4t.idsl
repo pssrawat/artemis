@@ -1,0 +1,51 @@
+parameter L, M, N;
+iterator k, j, i;
+double in[L,M,N], out[L,M,N];
+double a, b, h2inv;
+
+copyin in, out, t, h2inv, a, b;
+
+stencil jacobi (out, in, h2inv, a, b) {
+  double temp1[L, M, N];
+  double temp2[L, M, N];
+  double temp3[L, M, N];
+  double c = b * h2inv;
+
+  temp1[k][j][i] = a*in[k][j][i] - c*in[k][j][i+1]
+                                + c*in[k][j][i-1]
+                                + c*in[k][j+1][i]
+                                + c*in[k][j-1][i]
+                                + c*in[k+1][j][i]
+                                + c*in[k-1][j][i]
+                                - c*in[k][j][i]*6.0;
+
+  temp2[k][j][i] = a*temp1[k][j][i] - c*temp1[k][j][i+1]
+                                + c*temp1[k][j][i-1]
+                                + c*temp1[k][j+1][i]
+                                + c*temp1[k][j-1][i]
+                                + c*temp1[k+1][j][i]
+                                + c*temp1[k-1][j][i]
+                                - c*temp1[k][j][i]*6.0;
+
+  temp3[k][j][i] = a*temp2[k][j][i] - c*temp2[k][j][i+1]
+                                + c*temp2[k][j][i-1]
+                                + c*temp2[k][j+1][i]
+                                + c*temp2[k][j-1][i]
+                                + c*temp2[k+1][j][i]
+                                + c*temp2[k-1][j][i]
+                                - c*temp2[k][j][i]*6.0;
+
+  out[k][j][i] = a*temp3[k][j][i] - c*temp3[k][j][i+1]
+                                + c*temp3[k][j][i-1]
+                                + c*temp3[k][j+1][i]
+                                + c*temp3[k][j-1][i]
+                                + c*temp3[k+1][j][i]
+                                + c*temp3[k-1][j][i]
+                                - c*temp3[k][j][i]*6.0;
+}
+
+jacobi (out, in, h2inv, a, b);
+jacobi (in, out, h2inv, a, b);
+jacobi (out, in, h2inv, a, b);
+
+copyout out;

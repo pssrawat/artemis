@@ -1,0 +1,32 @@
+==178172== NVPROF is profiling process 178172, command: ./a.out
+==178172== Profiling application: ./a.out
+==178172== Warning: 1 records have invalid timestamps due to insufficient device buffer space. You can configure the buffer space using the option --device-buffer-size.
+==178172== Profiling result:
+   Start  Duration            Grid Size      Block Size     Regs*    SSMem*    DSMem*      Size  Throughput  SrcMemType  DstMemType           Device   Context    Stream  Name
+      ms        ms                                                       KB         B        MB        GB/s
+357.5598  29.99109                    -               -         -         -         -  250.0000    8.140438    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+388.3046  29.38073                    -               -         -         -         -  250.0000    8.309550    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+418.4773  29.37942                    -               -         -         -         -  250.0000    8.309921    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+448.5893  29.21683                    -               -         -         -         -  250.0000    8.356165    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+478.5865  29.46105                    -               -         -         -         -  250.0000    8.286895    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+508.8113  29.11632                    -               -         -         -         -  250.0000    8.385011    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+538.6879  29.19811                    -               -         -         -         -  250.0000    8.361523    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+568.6416  29.24435                    -               -         -         -         -  250.0000    8.348301    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+598.6785  29.35769                    -               -         -         -         -  250.0000    8.316071    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+628.8188  30.42773                    -               -         -         -         -  250.0000    8.023623    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+660.0004  29.65951                    -               -         -         -         -  250.0000    8.231444    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+690.4198  29.43993                    -               -         -         -         -  250.0000    8.292840    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+720.4091  29.35430                    -               -         -         -         -  250.0000    8.317032    Pageable      Device  Tesla P100-PCIE         1         7  [CUDA memcpy HtoD]
+749.7719  22.14991            (40 40 1)       (16 16 1)       152  14.00000         0         -           -           -           -  Tesla P100-PCIE         1         7  hypterm_1(double*, double*, double*, double*, double*, double*, double*, double*, double*, double*, double*, double*, double*, double, double, double, int, int, int) [161]
+771.9301  20.11946                    -               -         -         -         -  250.0000   12.134553      Device    Pageable  Tesla P100-PCIE         1         7  [CUDA memcpy DtoH]
+792.1355  20.10848                    -               -         -         -         -  250.0000   12.141176      Device    Pageable  Tesla P100-PCIE         1         7  [CUDA memcpy DtoH]
+812.3257  20.17479                    -               -         -         -         -  250.0000   12.101275      Device    Pageable  Tesla P100-PCIE         1         7  [CUDA memcpy DtoH]
+832.5825  20.13335                    -               -         -         -         -  250.0000   12.126182      Device    Pageable  Tesla P100-PCIE         1         7  [CUDA memcpy DtoH]
+852.7973  20.15235                    -               -         -         -         -  250.0000   12.114745      Device    Pageable  Tesla P100-PCIE         1         7  [CUDA memcpy DtoH]
+
+Regs: Number of registers used per CUDA thread. This number includes registers used internally by the CUDA driver and/or tools and can be more than what the compiler shows.
+SSMem: Static shared memory allocated per CUDA block.
+DSMem: Dynamic shared memory allocated per CUDA block.
+SrcMemType: The type of source memory accessed by memory operation/copy
+DstMemType: The type of destination memory accessed by memory operation/copy
+======== Error: Application returned non-zero code 255

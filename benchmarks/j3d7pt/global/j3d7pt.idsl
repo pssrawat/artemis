@@ -1,0 +1,22 @@
+parameter L, M, N;
+iterator k, j, i;
+double in[L,M,N], out[L,M,N];
+double a, b, h2inv;
+
+copyin in, out, t, h2inv, a, b;
+
+stencil jacobi (out, in, h2inv, a, b) {
+    double c = b * h2inv;
+    gmem out, in;
+    out[k][j][i] = a*in[k][j][i] - c*in[k][j][i+1]
+                                + c*in[k][j][i-1]
+                                + c*in[k][j+1][i]
+                                + c*in[k][j-1][i]
+                                + c*in[k+1][j][i]
+                                + c*in[k-1][j][i]
+                                - c*in[k][j][i]*6.0;
+}
+
+jacobi (out, in, h2inv, a, b);
+jacobi (in, out, h2inv, a, b);
+copyout in;

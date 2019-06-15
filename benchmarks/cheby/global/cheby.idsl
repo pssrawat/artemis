@@ -1,0 +1,25 @@
+parameter L, M, N;
+iterator k, j, i;
+double Ac[L,M,N], Ap[L,M,N], out[L,M,N], Dinv[L,M,N], RHS[L,M,N];
+double c1, c2, h2inv;
+
+copyin out, Ac, Ap, RHS, Dinv, h2inv, c1, c2;
+
+stencil cheby (out, Ac, Ap, RHS, Dinv, h2inv, c1, c2) {
+	double a, b, c, d;
+	double temp;
+
+	gmem Ac, Ap, out, Dinv, RHS; 
+
+	a = h2inv * 0.03;
+	b = h2inv * 0.1;
+	c = h2inv * 0.46;
+	d = h2inv * 4.26;
+
+	temp = -Ac[k][j][i] + a * (Ac[k-1][j-1][i-1] + Ac[k-1][j-1][i+1] + Ac[k-1][j+1][i-1] + Ac[k-1][j+1][i+1] + Ac[k+1][j-1][i-1] + Ac[k+1][j-1][i+1] + Ac[k+1][j+1][i-1] + Ac[k+1][j+1][i+1]) + b * (Ac[k-1][j-1][i] + Ac[k-1][j][i-1] + Ac[k-1][j][i+1] + Ac[k-1][j+1][i] + Ac[k][j-1][i-1] + Ac[k][j-1][i+1] + Ac[k][j+1][i-1] + Ac[k][j+1][i+1] + Ac[k+1][j-1][i] + Ac[k+1][j][i-1] + Ac[k+1][j][i+1] + Ac[k+1][j+1][i]) + c * (Ac[k-1][j][i] + Ac[k][j-1][i] + Ac[k][j][i-1] + Ac[k][j][i+1] + Ac[k][j+1][i] + Ac[k+1][j][i]) - d * Ac[k][j][i];
+        out[k][j][i] = Ac[k][j][i] + c1 * (Ac[k][j][i] - Ap[k][j][i]) + c2 * Dinv[k][j][i] * (RHS[k][j][i] + temp);
+}
+
+cheby (out, Ac, Ap, RHS, Dinv, h2inv, c1, c2);
+
+copyout out;
