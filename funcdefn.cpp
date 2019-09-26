@@ -6186,7 +6186,7 @@ void stencilDefn::print_mapped_stencil_stmts (stringstream &out, vector<string> 
 				st_lo->decompose_access_fsm (st_lo_id, st_lo_val);
 				exprNode *st_hi = (*st_dom)->get_hi_range ();
 				string st_hi_id = "";
-				int st_hi_val = 1;
+				int st_hi_val = 0;
 				st_hi->decompose_access_fsm (st_hi_id, st_hi_val);
 				// Get the lo and hi bounds of res_dom
 				exprNode *res_lo = (*res_dom)->get_lo_range ();
