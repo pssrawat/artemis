@@ -1628,12 +1628,23 @@ bool stencilDefn::print_shm_initializations (stringstream &out) {
 								init_lo->decompose_access_fsm (init_lo_id, init_lo_val);
 								initializations << "[";
 								if(!code_diff) {
+							          initializations << "min(";
 								  if (!init_lo_id.empty ()) 
 								  	initializations << init_lo_id;
 								  int plane = max (0, min_extent + extent + init_lo_val);
 								  if (!init_lo_id.empty() && plane > 0)
 								  	initializations << "+";	
-								  initializations << plane;
+								  initializations << plane << ", ";
+								  exprNode *init_hi = (initial_hull[piv-iterators.begin()])->get_hi_range ();
+								  string init_hi_id = "";
+								  int init_hi_val = 0;
+								  init_hi->decompose_access_fsm (init_hi_id, init_hi_val);
+								  initializations << init_hi_id;
+								  if (!init_hi_id.empty() && init_hi_val>0)
+								  	initializations << "+";
+								  if (init_hi_val != 0)
+								  	initializations << init_hi_val;
+								  initializations << ")";
 								}
 								else
 									initializations << "0";
@@ -1643,11 +1654,23 @@ bool stencilDefn::print_shm_initializations (stringstream &out) {
 								string idx = index_vec.front ();
 								initializations << "[";
 								if (!code_diff) {
-									initializations << idx << "0";
+									initializations << "min(" << idx << "0";
 									int plane = max (0, min_extent + extent);
 									if (plane > 0) {
 										initializations << "+" << plane;
 									}
+									initializations << ", ";
+								    	vector<string>::iterator piv = find (iterators.begin(), iterators.end(), index_vec.front());
+								    	exprNode *init_hi = (initial_hull[piv-iterators.begin()])->get_hi_range ();
+								    	string init_hi_id = "";
+								    	int init_hi_val = 0;
+								    	init_hi->decompose_access_fsm (init_hi_id, init_hi_val);
+								    	initializations << init_hi_id;
+								    	if (!init_hi_id.empty() && init_hi_val>0)
+								    		initializations << "+";
+								    	if (init_hi_val != 0)
+								    		initializations << init_hi_val;
+								    	initializations << ")";
 								}
 								else
 									initializations << "0";		
@@ -2018,23 +2041,44 @@ void stencilDefn::print_reg_initializations (stringstream &out, bool print_condi
 								string init_lo_id = "";
 								int init_lo_val = 0;
 								init_lo->decompose_access_fsm (init_lo_id, init_lo_val);
-								initializations << "[";
+								initializations << "[min(";
 								if (!init_lo_id.empty ()) 
 									initializations << init_lo_id;
 								int plane = max (0, min_extent + extent + init_lo_val);
 								if (!init_lo_id.empty() && plane > 0)
 									initializations << "+";
-								initializations << plane << "]"; 
+								initializations << plane << ", ";
+ 								exprNode *init_hi = (initial_hull[piv-iterators.begin()])->get_hi_range ();
+								string init_hi_id = "";
+								int init_hi_val = 0;
+								init_hi->decompose_access_fsm (init_hi_id, init_hi_val);
+								initializations << init_hi_id;
+								if (!init_hi_id.empty() && init_hi_val>0)
+									initializations << "+";
+								if (init_hi_val != 0)
+									initializations << init_hi_val;
+								initializations << ")]"; 
 							}
 							else if (stream && (stream_dim.compare (index_vec.front()) == 0)) {
 								string idx = index_vec.front ();
-								initializations << "[";
+								initializations << "[min(";
 								initializations << idx << "0";
 								int plane = max (0, min_extent + extent);
 								if (plane > 0) {
 									initializations << "+" << plane;
-								}	
-								initializations << "]"; 
+								}
+								initializations << ", ";
+								vector<string>::iterator piv = find (iterators.begin(), iterators.end(), index_vec.front());
+								exprNode *init_hi = (initial_hull[piv-iterators.begin()])->get_hi_range ();
+								string init_hi_id = "";
+								int init_hi_val = 0;
+								init_hi->decompose_access_fsm (init_hi_id, init_hi_val);
+								initializations << init_hi_id;
+								if (!init_hi_id.empty() && init_hi_val>0)
+									initializations << "+";
+								if (init_hi_val != 0)
+									initializations << init_hi_val;
+								initializations << ")]"; 
 							}
 							else {
 								string idx = index_vec.front ();
