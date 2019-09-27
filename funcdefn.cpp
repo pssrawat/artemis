@@ -5778,7 +5778,7 @@ void stencilDefn::print_mapped_stencil_stmts (stringstream &out, vector<string> 
 				out << "+";
 			out << hi_val << ", ";
 			// Print the bound;
-			out << stream_dim << "0+" << (get_block_dims())[blockdims[pos]]-1 + abs(recompute_lo_val) + abs(recompute_hi_val) - 1;
+			out << stream_dim << "0+" << (get_block_dims())[blockdims[pos]] + lo_val + (retiming_feasible ? abs(recompute_lo_val)+abs(recompute_hi_val) : 0) - 1;
 			out << "); ";	
 		}
 		// Increment expression
